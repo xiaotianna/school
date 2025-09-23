@@ -1,3 +1,10 @@
 :root {
-  --color-primary: #409EFF;
+  --color-primary: #409eff;
+  --accent: var(--vsc-accent, var(--scn-accent));
+  --accent-foreground: var(
+    --vsc-accent-foreground,
+    var(--scn-accent-foreground)
+  );
+  --scn-accent: 240 4.8% 95.9%;
+  --scn-accent-foreground: 240 4.8% 10.2%;
 }

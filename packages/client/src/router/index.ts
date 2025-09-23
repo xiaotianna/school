@@ -1,28 +1,53 @@
-import { createRouter, createWebHistory, type RouterOptions } from 'vue-router';
+import { createRouter, createWebHistory, type RouterOptions } from 'vue-router'
 
 const routes: RouterOptions['routes'] = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/Home.vue'),
+    component: () => import('@/views/Home.vue')
   },
   {
-    path: '',
-    redirect: '/dashboard',
+    path: '/post/:id',
+    name: 'PostDetail',
+    component: () => import('../views/PostDetail.vue')
+  },
+  {
+    path: '/user/:id',
+    name: 'UserProfile',
+    component: () => import('../views/UserProfile.vue')
+  },
+  {
+    path: '/dashboard',
+    redirect: '/dashboard/all',
     component: () => import('@/views/Layout/index.vue'),
     children: [
       {
-        path: '/dashboard',
-        name: 'Dashboard',
-        component: () => import('@/views/Layout/Dashboard.vue'),
+        path: 'all',
+        name: 'All',
+        component: () => import('@/views/Layout/All.vue')
       },
-    ],
-  },
-];
+      {
+        path: 'message',
+        name: 'Message',
+        component: () => import('@/views/Layout/Message.vue')
+      },
+      {
+        path: 'content',
+        name: 'Content',
+        component: () => import('@/views/Layout/Content.vue')
+      },
+      {
+        path: 'setting',
+        name: 'Setting',
+        component: () => import('@/views/Layout/Setting.vue')
+      }
+    ]
+  }
+]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
-});
+  routes
+})
 
-export default router;
+export default router
