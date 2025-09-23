@@ -1,0 +1,13 @@
+{
+  "name": "school-wall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm -F client dev",
+    "build:client": "pnpm -F @school-wall/client build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
