@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm -F client dev",
-    "build:client": "pnpm -F @school-wall/client build"
+    "build:client": "pnpm -F client build",
+    "dev:server": "pnpm -F server dev:server",
+    "build:server": "pnpm -F server build",
+    "start:server": "pnpm -F server start"
   },
   "keywords": [],
   "author": "",
