@@ -11,6 +11,7 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.13",
     "@vueuse/core": "^13.9.0",
+    "aieditor": "^1.4.1",
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

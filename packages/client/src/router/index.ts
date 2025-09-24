@@ -7,16 +7,6 @@ const routes: RouterOptions['routes'] = [
     component: () => import('@/views/Home.vue')
   },
   {
-    path: '/post/:id',
-    name: 'PostDetail',
-    component: () => import('../views/PostDetail.vue')
-  },
-  {
-    path: '/user/:id',
-    name: 'UserProfile',
-    component: () => import('../views/UserProfile.vue')
-  },
-  {
     path: '/dashboard',
     redirect: '/dashboard/all',
     component: () => import('@/views/Layout/index.vue'),
@@ -42,6 +32,31 @@ const routes: RouterOptions['routes'] = [
         component: () => import('@/views/Layout/Setting.vue')
       }
     ]
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/Login.vue')
+  },
+  {
+    path: '/post/:id',
+    name: 'PostDetail',
+    component: () => import('@/views/PostDetail.vue')
+  },
+  {
+    path: '/user/:id',
+    name: 'UserProfile',
+    component: () => import('@/views/UserProfile.vue')
+  },
+  {
+    path: '/publish',
+    name: 'Publish',
+    component: () => import('@/views/Publish.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFound.vue')
   }
 ]
 

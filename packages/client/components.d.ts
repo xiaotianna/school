@@ -22,6 +22,8 @@ declare module 'vue' {
     ElMain: typeof import('element-plus/es')['ElMain']
     Follow: typeof import('./src/components/icon/follow.vue')['default']
     Input: typeof import('./src/components/ui/input/Input.vue')['default']
+    Label: typeof import('./src/components/ui/label/Label.vue')['default']
+    LoginForm: typeof import('./src/components/LoginForm/index.vue')['default']
     Message: typeof import('./src/components/icon/message.vue')['default']
     PostList: typeof import('./src/components/PostList/index.vue')['default']
     Publish: typeof import('./src/components/icon/publish.vue')['default']
@@ -41,6 +43,10 @@ declare module 'vue' {
     SelectTrigger: typeof import('./src/components/ui/select/SelectTrigger.vue')['default']
     SelectValue: typeof import('./src/components/ui/select/SelectValue.vue')['default']
     Setting: typeof import('./src/components/icon/setting.vue')['default']
+    Tabs: typeof import('./src/components/ui/tabs/Tabs.vue')['default']
+    TabsContent: typeof import('./src/components/ui/tabs/TabsContent.vue')['default']
+    TabsList: typeof import('./src/components/ui/tabs/TabsList.vue')['default']
+    TabsTrigger: typeof import('./src/components/ui/tabs/TabsTrigger.vue')['default']
     User: typeof import('./src/components/icon/user.vue')['default']
   }
 }

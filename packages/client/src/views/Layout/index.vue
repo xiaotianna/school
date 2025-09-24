@@ -26,6 +26,7 @@
                     v-if="item.type === 'menu' && item.link"
                     variant="outline"
                     class="w-full h-10 px-4 py-2"
+                    @click="$router.push(item.path!)"
                   >
                     <component :is="item.icon" />
                     <span>{{ item.name }}</span>
@@ -64,7 +65,6 @@ import All from '@/components/icon/all.vue'
 import Follow from '@/components/icon/follow.vue'
 import Message from '@/components/icon/message.vue'
 import Setting from '@/components/icon/setting.vue'
-import User from '@/components/icon/user.vue'
 import Publish from '@/components/icon/publish.vue'
 import { Button } from '@/components/ui/button'
 
