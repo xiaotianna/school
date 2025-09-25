@@ -16,7 +16,7 @@ import * as Joi from 'joi';
           .valid('production', 'development')
           .default('development'),
         DB_TYPE: Joi.string().default('mysql'),
-        DB_DATABASE: Joi.string().default('code-blocks-DB'),
+        DB_DATABASE: Joi.string().default('school_wall'),
         DB_HOST: Joi.string().required().default('localhost'),
         DB_PORT: Joi.number().required().default(3306),
         DB_USERNAME: Joi.string().required(),

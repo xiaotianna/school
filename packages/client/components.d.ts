@@ -23,7 +23,6 @@ declare module 'vue' {
     Follow: typeof import('./src/components/icon/follow.vue')['default']
     Input: typeof import('./src/components/ui/input/Input.vue')['default']
     Label: typeof import('./src/components/ui/label/Label.vue')['default']
-    LoginForm: typeof import('./src/components/LoginForm/index.vue')['default']
     Message: typeof import('./src/components/icon/message.vue')['default']
     PostList: typeof import('./src/components/PostList/index.vue')['default']
     Publish: typeof import('./src/components/icon/publish.vue')['default']
@@ -47,6 +46,14 @@ declare module 'vue' {
     TabsContent: typeof import('./src/components/ui/tabs/TabsContent.vue')['default']
     TabsList: typeof import('./src/components/ui/tabs/TabsList.vue')['default']
     TabsTrigger: typeof import('./src/components/ui/tabs/TabsTrigger.vue')['default']
+    Toast: typeof import('./src/components/ui/toast/Toast.vue')['default']
+    ToastAction: typeof import('./src/components/ui/toast/ToastAction.vue')['default']
+    ToastClose: typeof import('./src/components/ui/toast/ToastClose.vue')['default']
+    ToastDescription: typeof import('./src/components/ui/toast/ToastDescription.vue')['default']
+    Toaster: typeof import('./src/components/ui/toast/Toaster.vue')['default']
+    ToastProvider: typeof import('./src/components/ui/toast/ToastProvider.vue')['default']
+    ToastTitle: typeof import('./src/components/ui/toast/ToastTitle.vue')['default']
+    ToastViewport: typeof import('./src/components/ui/toast/ToastViewport.vue')['default']
     User: typeof import('./src/components/icon/user.vue')['default']
   }
 }

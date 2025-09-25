@@ -10,7 +10,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   /**
-   * 登录/注册接口
+   * 登录接口
    * @method POST
    * @param phone 手机号
    * @param password 密码
@@ -18,6 +18,19 @@ export class AuthController {
   @Post('signin')
   async signin(@Body() dto: SigninDto) {
     const res = await this.authService.signin(dto);
+    const { id, phone, username, token } = res;
+    return ResponseData.success({ id, phone, username, token });
+  }
+
+  /**
+   * 注册接口
+   * @method POST
+   * @param phone 手机号
+   * @param password 密码
+   */
+  @Post('signup')
+  async signup(@Body() dto: SigninDto) {
+    const res = await this.authService.signup(dto);
     const { id, phone, username } = res;
     return ResponseData.success({ id, phone, username });
   }
