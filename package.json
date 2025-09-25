@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "install:all": "pnpm install -r",
     "dev": "pnpm -F client dev",
     "build:client": "pnpm -F client build",
     "dev:server": "pnpm -F server dev:server",

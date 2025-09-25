@@ -1,36 +1,50 @@
-# Rsbuild project
+# 项目说明
 
-## Setup
+## 前端 client
 
-Install the dependencies:
+技术栈：
+
+- vue3
+- ts
+- vite
+- shadcn-vue：https://www.shadcn-vue.com/
+- tailwindcss
+
+如何运行：
 
 ```bash
-pnpm install
-```
-
-## Get started
-
-Start the dev server, and the app will be available at [http://localhost:3000](http://localhost:3000).
-
-```bash
+cd ./packages/client
+pnpm i
 pnpm dev
 ```
 
-Build the app for production:
+项目运行在 `http://localhost:5173`
+
+## 后端 server
+
+技术栈：
+
+- node
+- typescript
+- nest.js
+- mysql
+- typeorm
+- jwt
+
+如何运行：
+
+> 需要提前准备好数据库
+>
+> 数据库名：`school_wall`，db文件在 `./packages/db` 下
 
 ```bash
-pnpm build
+cd ./packages/server
+pnpm i
+pnpm dev:server
 ```
 
-Preview the production build locally:
+服务启动在 `http://localhost:3000`
 
-```bash
-pnpm preview
-```
+## 项目部署
 
-## Learn more
-
-To learn more about Rsbuild, check out the following resources:
-
-- [Rsbuild documentation](https://rsbuild.rs) - explore Rsbuild features and APIs.
-- [Rsbuild GitHub repository](https://github.com/web-infra-dev/rsbuild) - your feedback and contributions are welcome!
+前端采用 `Github Actions`，后端采用 `Vercel`
