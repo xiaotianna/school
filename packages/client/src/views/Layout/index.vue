@@ -64,6 +64,7 @@
 import All from '@/components/icon/all.vue'
 import Follow from '@/components/icon/follow.vue'
 import Message from '@/components/icon/message.vue'
+import User from '@/components/icon/user.vue'
 import Setting from '@/components/icon/setting.vue'
 import Publish from '@/components/icon/publish.vue'
 import { Button } from '@/components/ui/button'
@@ -93,6 +94,12 @@ const menus = [
     name: '内容管理',
     path: '/dashboard/content',
     icon: All
+  },
+  {
+    type: 'menu',
+    name: '我的',
+    path: '/dashboard/user',
+    icon: User
   },
   {
     type: 'line'

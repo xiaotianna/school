@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -16,5 +17,37 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+    // 先查找用户
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      return null;
+    }
+
+    // 只更新提供的字段
+    const updateData: Partial<User> = {};
+    if (updateUserDto.username !== undefined) {
+      updateData.username = updateUserDto.username;
+    }
+    if (updateUserDto.imgUrl !== undefined) {
+      updateData.imgUrl = updateUserDto.imgUrl;
+    }
+    if (updateUserDto.sex !== undefined) {
+      updateData.sex = updateUserDto.sex;
+    }
+    if (updateUserDto.sign !== undefined) {
+      updateData.sign = updateUserDto.sign;
+    }
+    if (updateUserDto.tag !== undefined) {
+      updateData.tag = updateUserDto.tag;
+    }
+
+    // 更新用户信息
+    Object.assign(user, updateData);
+
+    // 保存更新后的用户信息
+    return await this.userRepository.save(user);
   }
 }

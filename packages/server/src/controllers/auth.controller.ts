@@ -18,8 +18,8 @@ export class AuthController {
   @Post('signin')
   async signin(@Body() dto: SigninDto) {
     const res = await this.authService.signin(dto);
-    const { id, phone, username, token } = res;
-    return ResponseData.success({ id, phone, username, token });
+    const { id, phone, token, username, imgUrl } = res;
+    return ResponseData.success({ id, phone, token, username, imgUrl });
   }
 
   /**
@@ -31,7 +31,7 @@ export class AuthController {
   @Post('signup')
   async signup(@Body() dto: SigninDto) {
     const res = await this.authService.signup(dto);
-    const { id, phone, username } = res;
-    return ResponseData.success({ id, phone, username });
+    const { id, phone } = res;
+    return ResponseData.success({ id, phone });
   }
 }

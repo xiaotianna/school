@@ -8,8 +8,9 @@ export interface LoginData {
 export type UserInfoType = {
   id: string
   phone: string
-  username: string
   token: string
+  username: string
+  imgUrl: string
 }
 
 export interface SigninResponse extends Response {

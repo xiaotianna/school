@@ -86,6 +86,7 @@ importers:
       '@types/cors': ^2.8.19
       '@types/express': ^4.17.17
       '@types/jest': ^29.5.2
+      '@types/multer': ^2.0.0
       '@types/node': ^20.3.1
       '@types/passport-jwt': ^4.0.1
       '@types/supertest': ^6.0.0
@@ -102,6 +103,7 @@ importers:
       eslint-plugin-prettier: ^5.0.0
       jest: ^29.5.0
       joi: ^18.0.1
+      multer: ^2.0.2
       mysql2: ^3.15.1
       passport: ^0.7.0
       passport-jwt: ^4.0.1
@@ -131,6 +133,7 @@ importers:
       cross-env: 10.0.0
       dotenv: 17.2.2
       joi: 18.0.1
+      multer: 2.0.2
       mysql2: 3.15.1
       passport: 0.7.0
       passport-jwt: 4.0.1
@@ -145,6 +148,7 @@ importers:
       '@types/cors': 2.8.19
       '@types/express': 4.17.23
       '@types/jest': 29.5.14
+      '@types/multer': 2.0.0
       '@types/node': 20.19.17
       '@types/passport-jwt': 4.0.1
       '@types/supertest': 6.0.3
@@ -2699,6 +2703,12 @@ packages:
 
   /@types/ms/2.1.0:
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
+    dev: true
+
+  /@types/multer/2.0.0:
+    resolution: {integrity: sha512-C3Z9v9Evij2yST3RSBktxP9STm6OdMc5uR1xF1SGr98uv8dUlAL2hqwrZ3GVB3uyMyiegnscEK6PGtYvNrjTjw==}
+    dependencies:
+      '@types/express': 4.17.23
     dev: true
 
   /@types/node/20.19.17:

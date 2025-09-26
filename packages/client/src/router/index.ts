@@ -14,22 +14,39 @@ const routes: RouterOptions['routes'] = [
       {
         path: 'all',
         name: 'All',
-        component: () => import('@/views/Layout/All.vue')
+        component: () => import('@/views/Layout/All.vue'),
       },
       {
         path: 'message',
         name: 'Message',
-        component: () => import('@/views/Layout/Message.vue')
+        component: () => import('@/views/Layout/Message.vue'),
+        meta: {
+          isLogin: true
+        }
       },
       {
         path: 'content',
         name: 'Content',
-        component: () => import('@/views/Layout/Content.vue')
+        component: () => import('@/views/Layout/Content.vue'),
+        meta: {
+          isLogin: true
+        }
+      },
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('@/views/Layout/User.vue'),
+        meta: {
+          isLogin: true
+        }
       },
       {
         path: 'setting',
         name: 'Setting',
-        component: () => import('@/views/Layout/Setting.vue')
+        component: () => import('@/views/Layout/Setting.vue'),
+        meta: {
+          isLogin: true
+        }
       }
     ]
   },
@@ -41,17 +58,26 @@ const routes: RouterOptions['routes'] = [
   {
     path: '/post/:id',
     name: 'PostDetail',
-    component: () => import('@/views/PostDetail.vue')
+    component: () => import('@/views/PostDetail.vue'),
+    meta: {
+      isLogin: true
+    }
   },
   {
     path: '/user/:id',
     name: 'UserProfile',
-    component: () => import('@/views/UserProfile.vue')
+    component: () => import('@/views/UserProfile.vue'),
+    meta: {
+      isLogin: true
+    }
   },
   {
     path: '/publish',
     name: 'Publish',
-    component: () => import('@/views/Publish.vue')
+    component: () => import('@/views/Publish.vue'),
+    meta: {
+      isLogin: true
+    }
   },
   {
     path: '/:pathMatch(.*)*',

@@ -30,7 +30,7 @@ import { User } from '../entities/user.entity';
           database: configService.get(DB_DATABASE),
           entities: [User],
           // synchronize: configService.get(TYPEORM_synchronize), // 初始化时要为true，不然会创建不了表
-          synchronize: false, // 初始化时要为true，不然会创建不了表
+          synchronize: true, // 初始化时要为true，不然会创建不了表
         }) as TypeOrmModuleOptions,
     }),
   ],

@@ -2,7 +2,7 @@ import axios from 'axios'
 import router from '@/router/index'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
-import { baseUrl } from '@/common/baseUrl'
+import { baseUrl } from '@/common'
 
 const user = useUserStore()
 
@@ -24,11 +24,16 @@ request.interceptors.request.use(
 
 request.interceptors.response.use(
   async (response) => {
-    if (response.data?.code === 403) {
+    if (response.data?.code === 403 || response.data?.code === 401) {
       user.clearInfo()
       router.replace('/login')
-      ElMessage.error('无权限')
+      ElMessage.error(response.data.message || '登录已过期，请重新登录')
       return
+    }
+
+    if (response.data?.code !== 200) {
+      ElMessage.error(response.data.message || '请求失败')
+      return Promise.reject(response.data.message)
     }
 
     if (response.data?.code === 200) {

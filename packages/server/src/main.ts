@@ -7,6 +7,7 @@ import {
 } from '@nestjs/platform-express';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
@@ -22,6 +23,10 @@ async function bootstrap() {
     }),
   );
   app.use(cors());
+  // 配置静态资源目录
+  app.useStaticAssets(join(__dirname, '..', '/public/images'));
+  app.useStaticAssets(join(__dirname, '..', '/public/upload/edit'));
+  app.useStaticAssets(join(__dirname, '..', '/public/upload/user'));
   await app.listen(3000);
 }
 bootstrap();
