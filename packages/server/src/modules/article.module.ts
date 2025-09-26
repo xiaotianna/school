@@ -24,6 +24,6 @@ import { Comment } from '../entities/comment.entity';
   ],
   controllers: [ArticleController],
   providers: [ArticleService],
-  exports: [],
+  exports: [TypeOrmModule],
 })
 export class ArticleModule {}

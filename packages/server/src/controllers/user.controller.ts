@@ -16,17 +16,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { FileTypeDecorator } from '../decorators/file-type.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-
-export interface FileObject extends File {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  destination: string;
-  filename: string;
-  path: string;
-  size: number;
-}
+import { FileObject } from '../types/file';
 
 @Controller('user')
 @UseGuards(JwtGuard)
@@ -69,12 +59,11 @@ export class UserController {
   @FileTypeDecorator()
   @UseInterceptors(FileInterceptor('file'))
   upload(@UploadedFile() file: File) {
-    return {
-      code: 200,
-      message: '上传成功',
-      data: {
+    return ResponseData.success(
+      {
         url: `/${(file as FileObject).filename}`,
       },
-    };
+      '上传成功',
+    );
   }
 }

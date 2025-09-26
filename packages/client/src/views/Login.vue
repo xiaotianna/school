@@ -129,7 +129,7 @@ const handleSubmit = async (type: 'signin' | 'signup') => {
     ElMessage.success(type === 'signin' ? '登录成功' : '注册成功')
     if (type === 'signin') {
       userStore.setInfo(res.data)
-      router.push('/dashboard/all')
+      router.replace('/dashboard/all')
     }
   } else {
     toast({

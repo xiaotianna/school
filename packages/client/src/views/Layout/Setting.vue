@@ -50,7 +50,7 @@ const userStore = useUserStore()
 const logout = () => {
   userStore.clearInfo()
   ElMessage.success('已退出登录')
-  router.push('/login')
+  router.replace('/login')
 }
 
 const goToProfile = () => {

@@ -45,6 +45,12 @@ export class Article {
   })
   tags: string[];
 
+  // 状态 0:草稿 1:发布
+  @Column({
+    nullable: false,
+  })
+  status: number;
+
   @CreateDateColumn()
   create_time: Date;
 

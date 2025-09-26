@@ -5,8 +5,8 @@ export class ResponseData<T> {
     public data: T,
   ) {}
 
-  static success<T = any>(data: T) {
-    return new ResponseData(200, 'success', data);
+  static success<T = any>(data: T, message?: string) {
+    return new ResponseData(200, message || 'success', data);
   }
 
   static error(code: number, message: string) {
