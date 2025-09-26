@@ -3,8 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Article } from './article.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
 export class User {
@@ -53,6 +56,14 @@ export class User {
 
   @CreateDateColumn()
   create_time: Date;
+
+  // 文章
+  @OneToMany(() => Article, (article) => article.id)
+  articles: Article[];
+
+  // 评论
+  @OneToMany(() => Comment, (comment) => comment.id)
+  comments: Comment[];
 
   @BeforeInsert()
   setDefaultUsername() {

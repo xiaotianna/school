@@ -5,8 +5,10 @@
         <!-- 头像 -->
         <div class="p-4 border-b">
           <div class="flex items-center gap-2">
-            <div class="h-6 w-6 rounded-full bg-primary"></div>
-            <span class="font-semibold">GenerativeAgent</span>
+            <div class="h-8 w-8 rounded-full bg-primary">
+              <img :src="proxy.$baseUrl + userStore.imgUrl" alt="avatar" class="h-full w-full rounded-full"></img>
+            </div>
+            <span class="font-semibold">{{ userStore.username }}</span>
           </div>
         </div>
         <!-- 菜单栏 -->
@@ -68,6 +70,11 @@ import User from '@/components/icon/user.vue'
 import Setting from '@/components/icon/setting.vue'
 import Publish from '@/components/icon/publish.vue'
 import { Button } from '@/components/ui/button'
+import { getCurrentInstance } from 'vue'
+import { useUserStore } from '@/store/user'
+const { proxy } = getCurrentInstance() as any
+
+const userStore = useUserStore()
 
 const menus = [
   {

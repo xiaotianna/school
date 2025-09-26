@@ -10,12 +10,13 @@
         class="flex gap-3 cursor-pointer rounded hover:bg-gray-50 p-2 -m-2"
         @click="navigateTo(post.id)"
       >
-        <div @click.stop="goProfile(post.userId)">
+        <div>
           <img
             v-if="post.avatar"
             :src="post.avatar"
             alt="avatar"
             class="w-10 h-10 rounded-full object-cover shrink-0"
+            @click.stop="goProfile(post.userId)"
           />
           <div
             v-else

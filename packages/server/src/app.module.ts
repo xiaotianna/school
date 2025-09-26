@@ -6,6 +6,7 @@ import { TypeOrmConfigModule } from './config/typeorm.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtStrategy } from './strategy/jwt.strategy';
+import { ArticleModule } from './modules/article.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     // api模块
     AuthModule,
     UserModule,
+    ArticleModule,
   ],
   controllers: [],
   providers: [JwtStrategy],

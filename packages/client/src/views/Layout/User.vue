@@ -186,13 +186,6 @@
                 class="flex-1"
                 >保存</Button
               >
-              <Button
-                type="button"
-                variant="outline"
-                class="flex-1"
-                @click="resetForm"
-                >重置</Button
-              >
             </div>
           </form>
         </div>
@@ -298,28 +291,18 @@ const updateProfile = async () => {
       tag: formData.tags,
       imgUrl: formData.avatar
     }
-
-    // 如果没有需要更新的字段，则直接返回
-    if (Object.keys(updateData).length === 0) {
-      ElMessage.info('没有需要更新的信息')
-      return
-    }
-    
-    // 调用API更新用户信息
     const res = await reqUpdateUserInfo(userStore.id, updateData)
     
     if (res.code === 200) {
       // 更新预览卡片
       Object.assign(profile, formData)
       ElMessage.success('信息更新成功')
-      
-      // 如果更新的是用户名，也需要更新用户状态
-      if (updateData.username && updateData.username !== userStore.username) {
-        userStore.setInfo({
-          ...userStore.$state,
-          username: updateData.username
-        })
-      }
+      // 更新用户状态store
+      userStore.setInfo({
+        ...userStore.$state,
+        username: updateData.username,
+        imgUrl: updateData.imgUrl
+      })
     } else {
       ElMessage.error(res.message || '更新失败')
     }
@@ -327,12 +310,6 @@ const updateProfile = async () => {
     console.error('更新用户信息失败:', error)
     ElMessage.error('更新失败，请稍后重试')
   }
-}
-
-// 重置表单
-const resetForm = () => {
-  Object.assign(formData, profile)
-  newTag.value = ''
 }
 
 // 头像上传

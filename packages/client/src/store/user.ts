@@ -1,16 +1,18 @@
 import { defineStore } from 'pinia'
-import { removeStorage } from '@/utils/storage'
+import { removeStorage, setStorage } from '@/utils/storage'
 import type { UserInfoType } from '@/api/auth/type'
 import { userInfoLocalKey } from '@/common'
 
+interface UserState {
+  id: string
+  phone: string
+  token: string
+  username: string
+  imgUrl: string
+}
+
 export const useUserStore = defineStore('user', {
-  persist: [
-    {
-      key: userInfoLocalKey,
-      pick: ['id', 'phone', 'token']
-    }
-  ],
-  state: () => ({
+  state: (): UserState => ({
     id: '',
     phone: '',
     token: '',
@@ -25,11 +27,11 @@ export const useUserStore = defineStore('user', {
       this.token = token
       this.username = username
       this.imgUrl = imgUrl
+      setStorage(userInfoLocalKey, value)
     },
     clearInfo() {
       // 重置状态
       this.$reset()
-      // 移除持久化存储
       removeStorage(userInfoLocalKey)
     }
   }

@@ -14,6 +14,8 @@ import {
 } from '../common/constant/env';
 // typeorm 实体
 import { User } from '../entities/user.entity';
+import { Article } from '../entities/article.entity';
+import { Comment } from '../entities/comment.entity';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { User } from '../entities/user.entity';
           username: configService.get(DB_USERNAME),
           password: configService.get(DB_PASSWORD),
           database: configService.get(DB_DATABASE),
-          entities: [User],
+          entities: [User, Article, Comment],
           // synchronize: configService.get(TYPEORM_synchronize), // 初始化时要为true，不然会创建不了表
           synchronize: true, // 初始化时要为true，不然会创建不了表
         }) as TypeOrmModuleOptions,
