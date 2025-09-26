@@ -382,7 +382,7 @@ const getTagClass = (tag: string) => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .content-auto {
   content-visibility: auto;
 }

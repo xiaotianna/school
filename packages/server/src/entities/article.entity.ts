@@ -28,6 +28,7 @@ export class Article {
   // 内容
   @Column({
     nullable: false,
+    type: 'text',
   })
   content: string;
 

@@ -26,26 +26,8 @@ export class UserService {
       return null;
     }
 
-    // 只更新提供的字段
-    const updateData: Partial<User> = {};
-    if (updateUserDto.username !== undefined) {
-      updateData.username = updateUserDto.username;
-    }
-    if (updateUserDto.imgUrl !== undefined) {
-      updateData.imgUrl = updateUserDto.imgUrl;
-    }
-    if (updateUserDto.sex !== undefined) {
-      updateData.sex = updateUserDto.sex;
-    }
-    if (updateUserDto.sign !== undefined) {
-      updateData.sign = updateUserDto.sign;
-    }
-    if (updateUserDto.tag !== undefined) {
-      updateData.tag = updateUserDto.tag;
-    }
-
-    // 更新用户信息
-    Object.assign(user, updateData);
+    // 直接将传入的数据合并到用户对象中
+    Object.assign(user, updateUserDto);
 
     // 保存更新后的用户信息
     return await this.userRepository.save(user);

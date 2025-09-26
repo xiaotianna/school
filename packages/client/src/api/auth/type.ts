@@ -11,6 +11,7 @@ export type UserInfoType = {
   token: string
   username: string
   imgUrl: string
+  isAnonymous?: boolean
 }
 
 export interface SigninResponse extends Response {

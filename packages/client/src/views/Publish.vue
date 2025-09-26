@@ -346,11 +346,10 @@ const handlePublish = async () => {
     }
 
     const response = await publishArticle(articleData)
-
     if (response.code === 200) {
       isContentSaved.value = true
       ElMessage.success('文章发布成功')
-      router.push(`/post/${response.data.id}`)
+      router.replace(`/post/${response.data.id}`)
     } else {
       console.error('文章发布失败:', response.message)
       ElMessage.error('文章发布失败')

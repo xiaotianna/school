@@ -1,10 +1,11 @@
 import request from '@/api/request'
-import type { ArticleResponse, UploadImageResponse } from './type'
+import type { ArticleResponse, UploadImageResponse, ArticleListResponse } from './type'
 
 enum API {
   UPLOAD = '/article/upload',
   DRAFT = '/article/draft',
-  PUBLISH = '/article/publish'
+  PUBLISH = '/article/publish',
+  ALL = '/article/all'
 }
 
 // 上传图片
@@ -34,5 +35,13 @@ export const publishArticle = (data: any) => {
     url: API.PUBLISH,
     method: 'post',
     data
+  })
+}
+
+// 获取所有已发布的文章
+export const getAllArticles = () => {
+  return request<any, ArticleListResponse>({
+    url: API.ALL,
+    method: 'get'
   })
 }

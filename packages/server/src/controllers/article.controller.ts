@@ -6,6 +6,7 @@ import {
   Body,
   Req,
   UseGuards,
+  Get,
 } from '@nestjs/common';
 import { FileTypeDecorator } from 'src/decorators/file-type.decorator';
 import { ArticleService } from '../services/article.service';
@@ -19,6 +20,20 @@ import { ResponseData } from '../common/response';
 @UseGuards(JwtGuard)
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
+
+  /**
+   * 获取所有已发布的文章
+   * @returns 文章列表
+   */
+  @Get('all')
+  async findAllPublished() {
+    try {
+      const articles = await this.articleService.findAllPublished();
+      return ResponseData.success(articles, '获取文章列表成功');
+    } catch (error) {
+      return ResponseData.error(500, '获取文章列表失败: ' + error.message);
+    }
+  }
 
   /**
    * 多图片上传接口

@@ -65,4 +65,18 @@ export class ArticleService {
     // 保存文章
     return await this.articleRepository.save(article);
   }
+
+  /**
+   * 获取所有已发布的文章
+   * @returns 文章列表
+   */
+  async findAllPublished() {
+    return await this.articleRepository.find({
+      where: { status: 1 }, // 只获取已发布的文章
+      relations: ['author'], // 关联作者信息
+      order: {
+        create_time: 'DESC', // 按创建时间倒序排列
+      },
+    });
+  }
 }

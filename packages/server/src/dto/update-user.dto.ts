@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsArray, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  IsEnum,
+  IsBoolean,
+} from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -20,4 +26,8 @@ export class UpdateUserDto {
   @IsArray()
   @IsString({ each: true })
   tag?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  isAnonymous?: boolean;
 }

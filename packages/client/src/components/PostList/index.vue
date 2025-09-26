@@ -13,7 +13,7 @@
         <div>
           <img
             v-if="post.avatar"
-            :src="post.avatar"
+            :src="proxy.$baseUrl + post.avatar"
             alt="avatar"
             class="w-10 h-10 rounded-full object-cover shrink-0"
             @click.stop="goProfile(post.userId)"
@@ -39,7 +39,7 @@
           <div
             class="mt-1 text-sm leading-6 whitespace-pre-wrap break-words text-gray-800 content-ellipsis-5"
           >
-            {{ post.content }}
+            {{ extractTextFromHtml(post.content) }}
           </div>
 
           <div
@@ -50,7 +50,7 @@
             <img
               v-for="(img, idx) in post.images"
               :key="idx"
-              :src="img"
+              :src="proxy.$baseUrl + img"
               alt="image"
               class="w-full h-28 object-cover rounded"
             />
@@ -88,7 +88,11 @@
 </template>
 
 <script setup lang="ts">
+import { formatTime } from '@/utils/formatTime'
 import { useRouter } from 'vue-router'
+import { getCurrentInstance } from 'vue'
+import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
+const { proxy } = getCurrentInstance() as any
 
 type PostItem = {
   id: string | number
@@ -105,24 +109,6 @@ type PostItem = {
 defineProps<{
   posts: PostItem[]
 }>()
-
-function formatTime(time: PostItem['createdAt']): string {
-  const date = time instanceof Date ? time : new Date(time)
-  const now = Date.now()
-  const diff = Math.max(0, now - date.getTime())
-  const minute = 60 * 1000
-  const hour = 60 * minute
-  const day = 24 * hour
-  if (diff < minute) return '刚刚'
-  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`
-  if (diff < day) return `${Math.floor(diff / hour)} 小时前`
-  const y = date.getFullYear()
-  const m = `${date.getMonth() + 1}`.padStart(2, '0')
-  const d = `${date.getDate()}`.padStart(2, '0')
-  const hh = `${date.getHours()}`.padStart(2, '0')
-  const mm = `${date.getMinutes()}`.padStart(2, '0')
-  return `${y}-${m}-${d} ${hh}:${mm}`
-}
 
 function imageGridClass(length: number): string {
   if (length === 1) return 'grid-cols-1'

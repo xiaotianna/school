@@ -65,6 +65,12 @@ export class User {
   @OneToMany(() => Comment, (comment) => comment.id)
   comments: Comment[];
 
+  // 是否匿名
+  @Column({
+    default: false,
+  })
+  isAnonymous: boolean;
+
   @BeforeInsert()
   setDefaultUsername() {
     this.username = this.phone;

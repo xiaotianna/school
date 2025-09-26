@@ -9,6 +9,7 @@ interface UserState {
   token: string
   username: string
   imgUrl: string
+  isAnonymous: boolean
 }
 
 export const useUserStore = defineStore('user', {
@@ -17,16 +18,18 @@ export const useUserStore = defineStore('user', {
     phone: '',
     token: '',
     username: '',
-    imgUrl: ''
+    imgUrl: '',
+    isAnonymous: false
   }),
   actions: {
     setInfo(value: UserInfoType) {
-      const { id, phone, token, username, imgUrl } = value
+      const { id, phone, token, username, imgUrl, isAnonymous } = value
       this.id = id
       this.phone = phone
       this.token = token
       this.username = username
       this.imgUrl = imgUrl
+      this.isAnonymous = isAnonymous ?? false
       setStorage(userInfoLocalKey, value)
     },
     clearInfo() {

@@ -34,3 +34,7 @@ export interface Article {
 export interface ArticleResponse extends Response {
   data: Article
 }
+
+export interface ArticleListResponse extends Response {
+  data: Article[]
+}

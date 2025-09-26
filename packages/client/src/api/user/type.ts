@@ -8,6 +8,7 @@ export interface UserInfo {
   sex: number
   sign: string
   tag: string[]
+  isAnonymous: boolean
 }
 
 export interface UpdateUserInfo {
@@ -16,6 +17,7 @@ export interface UpdateUserInfo {
   sex?: number
   sign?: string
   tag?: string[]
+  isAnonymous?: boolean
 }
 
 export interface GetUserResponse extends Response {
