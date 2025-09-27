@@ -12,7 +12,7 @@
       >
         <div>
           <img
-            v-if="post.avatar"
+            v-if="post.avatar && !post.isAnonymous"
             :src="proxy.$baseUrl + post.avatar"
             alt="avatar"
             class="w-10 h-10 rounded-full object-cover shrink-0"
@@ -22,14 +22,14 @@
             v-else
             class="w-10 h-10 rounded-full bg-gray-200 shrink-0 flex items-center justify-center text-xs text-gray-500"
           >
-            {{ post.nickname?.[0] ?? 'U' }}
+            {{ post.isAnonymous ? '匿' : (post.nickname?.[0] ?? 'U') }}
           </div>
         </div>
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <span class="text-sm font-medium truncate">{{
-              post.nickname || '匿名用户'
+              post.isAnonymous ? '匿名用户' : post.nickname || 'User'
             }}</span>
             <span class="text-xs text-gray-400">·</span>
             <span class="text-xs text-gray-400">{{
@@ -104,6 +104,8 @@ type PostItem = {
   tags?: string[]
   createdAt: string | number | Date
   likes?: number
+  // 是否匿名（该数据理应放在server端的，但是为了方便，所以在client端做判断）
+  isAnonymous: boolean
 }
 
 defineProps<{

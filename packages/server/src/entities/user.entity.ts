@@ -58,7 +58,7 @@ export class User {
   create_time: Date;
 
   // 文章
-  @OneToMany(() => Article, (article) => article.id)
+  @OneToMany(() => Article, (article) => article.author)
   articles: Article[];
 
   // 评论

@@ -51,7 +51,10 @@
         <h3 class="text-lg font-semibold mb-4">标签选择</h3>
         <div class="space-y-3 mb-6">
           <!-- 标签输入区域 -->
-          <div v-if="tags.length" class="flex flex-wrap gap-2 mb-2">
+          <div
+            v-if="tags.length"
+            class="flex flex-wrap gap-2 mb-2"
+          >
             <span
               v-for="(tag, index) in tags"
               :key="index"
@@ -81,9 +84,11 @@
               添加
             </button>
           </div>
-          <p class="text-xs text-gray-500">最多可添加5个标签，每个标签不超过10个字符</p>
+          <p class="text-xs text-gray-500">
+            最多可添加5个标签，每个标签不超过10个字符
+          </p>
         </div>
-        
+
         <h3 class="text-lg font-semibold mb-4">图片上传</h3>
 
         <!-- 图片上传区域 -->
@@ -307,6 +312,10 @@ const goBack = () => {
 }
 
 const handleSaveDraft = async () => {
+  if (!title.value || !editorInstance?.getHtml()) {
+    ElMessage.error('请填写标题和内容')
+    return
+  }
   try {
     const articleData = {
       title: title.value,
@@ -333,6 +342,10 @@ const handleSaveDraft = async () => {
 }
 
 const handlePublish = async () => {
+  if (!title.value || !editorInstance?.getHtml()) {
+    ElMessage.error('请填写标题和内容')
+    return
+  }
   try {
     // 准备文章数据
     const articleData = {
@@ -436,7 +449,12 @@ const removeImage = (index: number) => {
 // 添加标签
 const addTag = () => {
   const tag = newTag.value.trim()
-  if (tag && !tags.value.includes(tag) && tags.value.length <= 5 && tag.length <= 10) {
+  if (
+    tag &&
+    !tags.value.includes(tag) &&
+    tags.value.length <= 5 &&
+    tag.length <= 10
+  ) {
     tags.value.push(tag)
     newTag.value = ''
     // 标记内容为未保存

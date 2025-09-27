@@ -7,14 +7,19 @@ import {
   Req,
   UseGuards,
   Get,
+  Request as NextRequest,
+  Query,
+  Delete,
+  HttpException,
 } from '@nestjs/common';
 import { FileTypeDecorator } from 'src/decorators/file-type.decorator';
 import { ArticleService } from '../services/article.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateArticleDto } from '../dto/create-article.dto';
-import { Request } from 'express';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ResponseData } from '../common/response';
+import type { Request } from 'express';
+import { GetArticlesDto } from '../dto/get-articles.dto';
 
 @Controller('article')
 @UseGuards(JwtGuard)
@@ -32,6 +37,43 @@ export class ArticleController {
       return ResponseData.success(articles, '获取文章列表成功');
     } catch (error) {
       return ResponseData.error(500, '获取文章列表失败: ' + error.message);
+    }
+  }
+
+  /**
+   * 获取当前用户的文章列表（支持分页和搜索）
+   * @param userId 用户ID
+   * @param page 页码
+   * @param limit 每页数量
+   * @param state 文章状态
+   * @param keyword 搜索关键词
+   */
+  @Get('my')
+  async findMyArticles(
+    @NextRequest() req: Request,
+    @Query() dto: GetArticlesDto,
+  ) {
+    const userId = (req.user as any).userId;
+    const res = await this.articleService.findMyArticles(userId, dto);
+    return ResponseData.success(res);
+  }
+
+  /**
+   * 删除文章接口
+   * @param userId 用户ID
+   * @param articleId 文章ID
+   */
+  @Delete()
+  async deleteArticles(
+    @NextRequest() req: Request,
+    @Body('articleId') articleId: string,
+  ) {
+    const userId = (req.user as any).userId;
+    const res = await this.articleService.deleteArticle(userId, articleId);
+    if (res.affected === 0) {
+      throw new HttpException('删除失败', 400);
+    } else if (res.affected > 0) {
+      return ResponseData.success(res, '删除成功');
     }
   }
 
@@ -66,11 +108,11 @@ export class ArticleController {
     @Body() createArticleDto: CreateArticleDto,
   ) {
     try {
-      // 从请求中获取用户ID（假设已经通过JWT验证）
       const userId = (req.user as any).id;
-      const draft = await this.articleService.saveDraft(
+      const draft = await this.articleService.saveArticle(
         userId,
         createArticleDto,
+        0,
       );
 
       return ResponseData.success(draft, '草稿保存成功');
@@ -91,11 +133,11 @@ export class ArticleController {
     @Body() createArticleDto: CreateArticleDto,
   ) {
     try {
-      // 从请求中获取用户ID（假设已经通过JWT验证）
       const userId = (req.user as any).id;
-      const article = await this.articleService.publishArticle(
+      const article = await this.articleService.saveArticle(
         userId,
         createArticleDto,
+        1,
       );
       return ResponseData.success(article, '文章发布成功');
     } catch (error) {

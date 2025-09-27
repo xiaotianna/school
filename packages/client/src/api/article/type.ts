@@ -27,14 +27,32 @@ export interface Article {
   author: Author;
   id: string;
   create_time: string;
-  update_time: string;
   likes: number;
+  isAnonymous: boolean;
 }
 
 export interface ArticleResponse extends Response {
   data: Article
 }
 
+// 首页所有数据
 export interface ArticleListResponse extends Response {
   data: Article[]
+}
+
+// 用户文章列表响应（分页）
+export interface MyArticlesResponse extends Response {
+  data: {
+    data: Article[]
+    total: number
+    page: number
+    limit: number
+  }
+}
+
+// 删除文章
+export interface DeleteArticleResponse extends Response {
+  data: {
+    affected: number
+  }
 }

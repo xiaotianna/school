@@ -72,7 +72,7 @@ const routes: RouterOptions['routes'] = [
     }
   },
   {
-    path: '/publish',
+    path: '/publish/:pathMatch(.*)*',
     name: 'Publish',
     component: () => import('@/views/Publish.vue'),
     meta: {
