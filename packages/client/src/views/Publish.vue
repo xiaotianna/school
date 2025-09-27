@@ -32,7 +32,7 @@
         @click="handlePublish"
         class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors whitespace-nowrap"
       >
-        发布
+        {{ id ? '更新' : '发布' }}
       </button>
     </div>
 
@@ -172,7 +172,7 @@
             <div class="ml-3 flex-1 min-w-0">
               <p class="text-sm font-medium truncate">{{ image.name }}</p>
               <p class="text-xs text-gray-500">
-                {{ formatFileSize(image.size) }}
+                {{ image.size && formatFileSize(image.size) }}
               </p>
               <!-- 状态文字提示 -->
               <p
@@ -225,11 +225,21 @@ import { AiEditor } from 'aieditor'
 import 'aieditor/dist/style.css'
 import { ChevronLeft } from 'lucide-vue-next'
 import { onMounted, ref, getCurrentInstance, onUnmounted } from 'vue'
-import { uploadImages, saveDraft, publishArticle } from '@/api/article'
-import { useRouter } from 'vue-router'
+import {
+  uploadImages,
+  saveDraft,
+  publishArticle,
+  getArticleDetail,
+  updateArticle,
+  updateDraft
+} from '@/api/article'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 const { proxy } = getCurrentInstance() as any
 const router = useRouter()
+const route = useRoute()
+
+const { id } = route.params
 
 const aiEditor = ref<HTMLElement | null>(null)
 const title = ref('')
@@ -244,23 +254,22 @@ const maxTitleLength = 20
 const isContentSaved = ref(true)
 
 interface UploadedImage {
-  file: File
+  file?: File
   name: string
-  size: number
+  size?: number
   previewUrl: string
   status: 'loading' | 'success' | 'error'
 }
 
 const uploadedImages = ref<UploadedImage[]>([])
 
-let editorInstance: AiEditor | null = null
+let editorInstance = ref<AiEditor | null>(null)
 
 onMounted(() => {
   if (aiEditor.value) {
-    editorInstance = new AiEditor({
+    editorInstance.value = new AiEditor({
       element: aiEditor.value,
       placeholder: '点击输入内容...',
-      content: '',
       toolbarExcludeKeys: [
         'brush',
         'eraser',
@@ -283,12 +292,37 @@ onMounted(() => {
       onChange: () => {
         // 当编辑器内容发生变化时，标记为未保存
         isContentSaved.value = false
+      },
+      onCreated: (aiEditor) => {
+        id && initArticle(aiEditor)
       }
     })
   }
 
   window.addEventListener('beforeunload', beforeUnloadHandler)
 })
+
+const initArticle = async (aiEditorInstance: AiEditor) => {
+  let res = await getArticleDetail(id as string)
+  if (res.code === 200) {
+    const { title: resTitle, content, tags: resTags, images } = res.data
+    // 初始化标题
+    title.value = resTitle
+    // 初始化编辑器内容
+    aiEditorInstance?.setContent(content)
+    // 初始化tag
+    tags.value = resTags || []
+    // 初始化图片列表
+    uploadedImages.value =
+      images.map((url) => {
+        return {
+          name: url.split('/').pop() as string,
+          previewUrl: proxy.$baseUrl + url,
+          status: 'success'
+        }
+      }) || []
+  }
+}
 
 onUnmounted(() => {
   window.removeEventListener('beforeunload', beforeUnloadHandler)
@@ -312,37 +346,42 @@ const goBack = () => {
 }
 
 const handleSaveDraft = async () => {
-  if (!title.value || !editorInstance?.getHtml()) {
+  if (!title.value || !editorInstance.value?.getHtml()) {
     ElMessage.error('请填写标题和内容')
     return
   }
   try {
     const articleData = {
       title: title.value,
-      content: editorInstance?.getHtml() || '',
+      content: editorInstance.value?.getHtml() || '',
       images: uploadedImages.value
         .filter((img) => img.status === 'success')
         .map((img) => img.previewUrl.replace(proxy.$baseUrl, '')),
       tags: tags.value,
       status: 0 // 草稿状态
     }
-    const response = await saveDraft(articleData)
+    let response
+    if (id) {
+      response = await updateDraft(id as string, articleData)
+    } else {
+      response = await saveDraft(articleData)
+    }
     if (response.code === 200) {
       isContentSaved.value = true
-      ElMessage.success('草稿保存成功')
+      ElMessage.success(`草稿${ id ? '更新' : '保存' }成功`)
       router.back()
     } else {
-      ElMessage.error('草稿保存失败')
-      console.error('草稿保存失败:', response.message)
+      ElMessage.error(`草稿${ id ? '更新' : '保存' }失败`)
+      console.error(`草稿${ id ? '更新' : '保存' }失败:`, response.message)
     }
   } catch (error) {
-    ElMessage.error('草稿保存失败')
-    console.error('草稿保存失败:', error)
+    ElMessage.error(`草稿${ id ? '更新' : '保存' }失败`)
+    console.error(`草稿${ id ? '更新' : '保存' }失败:`, error)
   }
 }
 
 const handlePublish = async () => {
-  if (!title.value || !editorInstance?.getHtml()) {
+  if (!title.value || !editorInstance.value?.getHtml()) {
     ElMessage.error('请填写标题和内容')
     return
   }
@@ -350,7 +389,7 @@ const handlePublish = async () => {
     // 准备文章数据
     const articleData = {
       title: title.value,
-      content: editorInstance?.getHtml() || '',
+      content: editorInstance.value?.getHtml() || '',
       images: uploadedImages.value
         .filter((img) => img.status === 'success')
         .map((img) => img.previewUrl.replace(proxy.$baseUrl, '')),
@@ -358,18 +397,23 @@ const handlePublish = async () => {
       status: 1 // 发布状态
     }
 
-    const response = await publishArticle(articleData)
+    let response
+    if (id) {
+      response = await updateArticle(id as string, articleData)
+    } else {
+      response = await publishArticle(articleData)
+    }
     if (response.code === 200) {
       isContentSaved.value = true
-      ElMessage.success('文章发布成功')
+      ElMessage.success(`文章${ id ? '更新' : '发布' }成功`)
       router.replace(`/post/${response.data.id}`)
     } else {
-      console.error('文章发布失败:', response.message)
-      ElMessage.error('文章发布失败')
+      console.error(`文章${ id ? '更新' : '发布' }失败:`, response.message)
+      ElMessage.error(`文章${ id ? '更新' : '发布' }失败`)
     }
   } catch (error) {
-    console.error('文章发布失败:', error)
-    ElMessage.error('文章发布失败')
+    console.error(`文章${ id ? '更新' : '发布' }失败:`, error)
+    ElMessage.error(`文章${ id ? '更新' : '发布' }失败`)
   }
 }
 
@@ -480,3 +524,12 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 </script>
+
+<style>
+.aie-codeblock-tools-comments {
+  display: none !important;
+}
+.aie-codeblock-tools-explain {
+  display: none !important;
+}
+</style>

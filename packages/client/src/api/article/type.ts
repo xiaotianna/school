@@ -31,8 +31,16 @@ export interface Article {
   isAnonymous: boolean;
 }
 
+export interface Comment {}
+
 export interface ArticleResponse extends Response {
   data: Article
+}
+
+export interface ArticleDetailResponse extends Response {
+  data: Article & {
+    comment: Comment[];
+  }
 }
 
 // 首页所有数据

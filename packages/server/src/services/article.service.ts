@@ -5,6 +5,7 @@ import { Article } from '../entities/article.entity';
 import { User } from '../entities/user.entity';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { GetArticlesDto } from '../dto/get-articles.dto';
+import { UpdateArticleDto } from '../dto/update-article.dto';
 
 @Injectable()
 export class ArticleService {
@@ -32,6 +33,45 @@ export class ArticleService {
     article.tags = createArticleDto.tags || [];
     article.status = status; // 状态 0:草稿 1:发布
     article.author = user;
+
+    return await this.articleRepository.save(article);
+  }
+
+  // 更新文章或草稿
+  async updateArticle(
+    userId: string,
+    articleId: string,
+    updateArticleDto: UpdateArticleDto,
+  ) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('用户不存在');
+    }
+
+    const article = await this.articleRepository.findOne({
+      where: { id: articleId, author: { id: userId } },
+    });
+
+    if (!article) {
+      throw new NotFoundException('文章不存在');
+    }
+
+    // 只更新传入的字段
+    if (updateArticleDto.title !== undefined) {
+      article.title = updateArticleDto.title;
+    }
+    if (updateArticleDto.content !== undefined) {
+      article.content = updateArticleDto.content;
+    }
+    if (updateArticleDto.images !== undefined) {
+      article.images = updateArticleDto.images;
+    }
+    if (updateArticleDto.tags !== undefined) {
+      article.tags = updateArticleDto.tags;
+    }
+    if (updateArticleDto.status !== undefined) {
+      article.status = updateArticleDto.status;
+    }
 
     return await this.articleRepository.save(article);
   }
@@ -123,5 +163,20 @@ export class ArticleService {
     } catch (error) {
       throw new NotFoundException('文章不存在');
     }
+  }
+
+  // 获取文章详情
+  async getArticleDetail(userId: string, articleId: string) {
+    return await this.articleRepository.findOne({
+      where: { id: articleId, author: { id: userId } },
+      relations: ['author', 'comments'],
+      select: {
+        author: {
+          id: true,
+          username: true,
+          imgUrl: true,
+        },
+      },
+    });
   }
 }

@@ -11,11 +11,15 @@ import {
   Query,
   Delete,
   HttpException,
+  Param,
+  NotFoundException,
+  Put,
 } from '@nestjs/common';
 import { FileTypeDecorator } from 'src/decorators/file-type.decorator';
 import { ArticleService } from '../services/article.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateArticleDto } from '../dto/create-article.dto';
+import { UpdateArticleDto } from '../dto/update-article.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { ResponseData } from '../common/response';
 import type { Request } from 'express';
@@ -108,7 +112,7 @@ export class ArticleController {
     @Body() createArticleDto: CreateArticleDto,
   ) {
     try {
-      const userId = (req.user as any).id;
+      const userId = (req.user as any).userId;
       const draft = await this.articleService.saveArticle(
         userId,
         createArticleDto,
@@ -133,7 +137,7 @@ export class ArticleController {
     @Body() createArticleDto: CreateArticleDto,
   ) {
     try {
-      const userId = (req.user as any).id;
+      const userId = (req.user as any).userId;
       const article = await this.articleService.saveArticle(
         userId,
         createArticleDto,
@@ -143,5 +147,82 @@ export class ArticleController {
     } catch (error) {
       return ResponseData.error(500, '文章发布失败: ' + error.message);
     }
+  }
+
+  /**
+   * 更新文章接口
+   * @param req 请求对象
+   * @param articleId 文章ID
+   * @param updateArticleDto 更新的文章数据
+   * @returns
+   */
+  @Put('/publish/update/:id')
+  async updateArticle(
+    @Req() req: Request,
+    @Param('id') articleId: string,
+    @Body() updateArticleDto: UpdateArticleDto,
+  ) {
+    try {
+      const userId = (req.user as any).userId;
+      const article = await this.articleService.updateArticle(
+        userId,
+        articleId,
+        updateArticleDto,
+      );
+      return ResponseData.success(article, '文章更新成功');
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return ResponseData.error(404, '文章不存在');
+      }
+      return ResponseData.error(500, '文章更新失败: ' + error.message);
+    }
+  }
+
+  /**
+   * 更新草稿接口
+   * @param req 请求对象
+   * @param articleId 文章ID
+   * @param updateArticleDto 更新的草稿数据
+   * @returns
+   */
+  @Put('draft/update/:id')
+  async updateDraft(
+    @Req() req: Request,
+    @Param('id') articleId: string,
+    @Body() updateArticleDto: UpdateArticleDto,
+  ) {
+    try {
+      const userId = (req.user as any).userId;
+      // 确保状态为草稿
+      updateArticleDto.status = 0;
+      const article = await this.articleService.updateArticle(
+        userId,
+        articleId,
+        updateArticleDto,
+      );
+      return ResponseData.success(article, '草稿更新成功');
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        return ResponseData.error(404, '草稿不存在');
+      }
+      return ResponseData.error(500, '草稿更新失败: ' + error.message);
+    }
+  }
+
+  /**
+   * 获取文章详情接口
+   * @param userId 用户ID
+   */
+  @Get(':id')
+  async getArticleDetail(
+    @Param('id') articleId: string,
+    @NextRequest() req: Request,
+  ) {
+    const userId = (req.user as any).userId;
+    const article = await this.articleService.getArticleDetail(
+      userId,
+      articleId,
+    );
+    return ResponseData.success(article, '获取文章详情成功');
   }
 }

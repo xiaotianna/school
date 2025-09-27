@@ -4,16 +4,20 @@ import type {
   UploadImageResponse,
   ArticleListResponse,
   MyArticlesResponse,
-  DeleteArticleResponse
+  DeleteArticleResponse,
+  ArticleDetailResponse
 } from './type'
 
 enum API {
   UPLOAD = '/article/upload',
-  DRAFT = '/article/draft',
-  PUBLISH = '/article/publish',
+  DRAFT = '/article/draft', // 草稿
+  PUBLISH = '/article/publish', // 发布
+  UPDATE_DRAFT = '/article/draft/update', // 更新草稿
+  UPDATE_PUBLISH = '/article/publish/update', // 更新文章
   ALL = '/article/all',
   MY = '/article/my',
-  DELETE = '/article'
+  DELETE = '/article',
+  DETAIL = '/article',
 }
 
 // 上传图片
@@ -37,11 +41,29 @@ export const saveDraft = (data: any) => {
   })
 }
 
+// 更新草稿
+export const updateDraft = (id: string, data: any) => {
+  return request<any, ArticleResponse>({
+    url: `${API.UPDATE_DRAFT}/${id}`,
+    method: 'put',
+    data
+  })
+}
+
 // 发布文章
 export const publishArticle = (data: any) => {
   return request<any, ArticleResponse>({
     url: API.PUBLISH,
     method: 'post',
+    data
+  })
+}
+
+// 更新文章
+export const updateArticle = (id: string, data: any) => {
+  return request<any, ArticleResponse>({
+    url: `${API.UPDATE_PUBLISH}/${id}`,
+    method: 'put',
     data
   })
 }
@@ -74,5 +96,13 @@ export const deleteArticle = (data: any) => {
     url: `${API.DELETE}`,
     method: 'delete',
     data
+  })
+}
+
+// 获取文章详情
+export const getArticleDetail = (articleId: string) => {
+  return request<any, ArticleDetailResponse>({
+    url: `${API.DETAIL}/${articleId}`,
+    method: 'get'
   })
 }

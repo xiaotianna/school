@@ -46,8 +46,39 @@
           </div>
         </div>
 
+        <!-- 空状态 -->
+        <div
+          v-if="works.length === 0 && !loading"
+          class="flex flex-col items-center justify-center py-12"
+        >
+          <div class="text-gray-400 mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-16 w-16"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-1">暂无作品</h3>
+          <p class="text-gray-500 mb-6">您还没有发布任何作品，立即创建您的第一个作品吧</p>
+          <Button @click="goToPublish" variant="default">
+            发布作品
+          </Button>
+        </div>
+
         <!-- 作品列表 - 使用v3的网格布局增强功能 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           <!-- 作品项 -->
           <div
             v-for="work in works"
@@ -87,7 +118,7 @@
                 <div class="text-sm">{{ work.date }}</div>
               </div>
               <p class="text-gray-600 text-sm mb-4 line-clamp-2">
-                {{ work.description }}
+                {{ extractTextFromHtml(work.description) }}
               </p>
 
               <div
@@ -139,7 +170,10 @@
         </div>
 
         <!-- 分页 -->
-        <div class="mt-8 flex justify-center">
+        <div
+          v-if="works.length > 0"
+          class="mt-8 flex justify-center"
+        >
           <nav class="flex items-center space-x-1">
             <Button
               @click="changePage(currentPage - 1)"
@@ -242,6 +276,7 @@ import { deleteArticle, getMyArticles } from '@/api/article'
 import { getCurrentInstance } from 'vue'
 import { Eye, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import type { Article, MyArticlesResponse } from '@/api/article/type'
+import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
 const { proxy } = getCurrentInstance() as any
 
 interface WorkItem {
@@ -270,10 +305,12 @@ const itemsPerPage = ref(10)
 
 // 作品数据
 const works = ref<WorkItem[]>([])
+const loading = ref(true)
 
 // 加载作品数据
 const loadWorks = async () => {
   try {
+    loading.value = true
     const params: {
       page: number
       limit: number
@@ -316,6 +353,8 @@ const loadWorks = async () => {
   } catch (error) {
     ElMessage.error('获取作品列表失败')
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -449,6 +488,11 @@ const imageLoadFailed = ref<Record<string, boolean>>({})
 // 处理图片加载失败
 const handleImageError = (workId: string) => {
   imageLoadFailed.value[workId] = true
+}
+
+// 跳转到发布页面
+const goToPublish = () => {
+  router.push('/publish')
 }
 </script>
 
