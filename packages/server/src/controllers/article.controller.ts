@@ -24,6 +24,7 @@ import { JwtGuard } from '../guards/jwt.guard';
 import { ResponseData } from '../common/response';
 import type { Request } from 'express';
 import { GetArticlesDto } from '../dto/get-articles.dto';
+import { AddArticleCommentDto } from '../dto/add-article-comment.dto';
 
 @Controller('article')
 @UseGuards(JwtGuard)
@@ -224,5 +225,18 @@ export class ArticleController {
       articleId,
     );
     return ResponseData.success(article, '获取文章详情成功');
+  }
+
+  /**
+   * 评论接口
+   */
+  @Post('comment/:articleId')
+  async addArticleComment(
+    @Body() dto: AddArticleCommentDto,
+    @NextRequest() req: Request,
+  ) {
+    const userId = (req.user as any).userId;
+    const res = await this.articleService.addArticleComment(userId, dto);
+    return ResponseData.success(res, '评论成功');
   }
 }

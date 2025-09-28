@@ -35,6 +35,8 @@ export class Comment {
   article: Article;
 
   // 回复的评论id（如果没有回复，则为null）
-  @ManyToOne(() => Comment, (comment) => comment.id, { nullable: true })
+  @ManyToOne(() => Comment, (comment) => comment.article, {
+    nullable: true,
+  })
   reply_comment: Comment | null;
 }

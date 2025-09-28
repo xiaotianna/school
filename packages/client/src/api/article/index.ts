@@ -5,7 +5,8 @@ import type {
   ArticleListResponse,
   MyArticlesResponse,
   DeleteArticleResponse,
-  ArticleDetailResponse
+  ArticleDetailResponse,
+  CommentResponse
 } from './type'
 
 enum API {
@@ -18,6 +19,7 @@ enum API {
   MY = '/article/my',
   DELETE = '/article',
   DETAIL = '/article',
+  COMMENT = '/article/comment'
 }
 
 // 上传图片
@@ -105,4 +107,16 @@ export const getArticleDetail = (articleId: string) => {
     url: `${API.DETAIL}/${articleId}`,
     method: 'get'
   })
+}
+
+// 评论接口
+export const reqComment = (data: {
+  content: string
+  articleId: string
+  replyCommentId?: string
+}) => {
+  return request.post<any, CommentResponse>(
+    `${API.COMMENT}/${data.articleId}`,
+    data
+  )
 }

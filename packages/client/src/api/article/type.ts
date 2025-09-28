@@ -6,41 +6,48 @@ export interface UploadImageResponse extends Response {
   }
 }
 
+// 定义作者接口
 export interface Author {
-  id: string;
-  phone: string;
-  username: string;
-  password: string;
-  imgUrl: string;
-  sex: number;
-  sign: string;
-  tag: string[];
-  create_time: string;
+  id: string
+  phone?: string
+  username: string
+  imgUrl: string
+  sex?: number
+  sign?: string
+  tag?: string[]
+  create_time?: string
+  isAnonymous: boolean
+}
+
+// 定义评论接口
+export interface Comment {
+  id: string
+  content: string
+  create_time: string
+  user: Author
+  reply_comment: Exclude<Comment, 'reply_comment' | 'content'>
 }
 
 export interface Article {
-  title: string;
-  content: string;
-  images: string[];
-  tags: string[];
-  status: number; // 0: 草稿，1: 发布
-  author: Author;
-  id: string;
-  create_time: string;
-  likes: number;
-  isAnonymous: boolean;
+  title: string
+  content: string
+  images: string[]
+  tags: string[]
+  status: number // 0: 草稿，1: 发布
+  id: string
+  create_time: string
+  update_time: string
+  likes: number
+  author: Author
+  comments: Comment[]
 }
 
-export interface Comment {}
-
 export interface ArticleResponse extends Response {
-  data: Article
+  data: Exclude<Article, 'comments'>
 }
 
 export interface ArticleDetailResponse extends Response {
-  data: Article & {
-    comment: Comment[];
-  }
+  data: Article
 }
 
 // 首页所有数据
@@ -63,4 +70,9 @@ export interface DeleteArticleResponse extends Response {
   data: {
     affected: number
   }
+}
+
+// 评论响应
+export interface CommentResponse extends Response {
+  data: Comment
 }

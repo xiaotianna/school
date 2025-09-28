@@ -3,9 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { User } from '../entities/user.entity';
+import { Comment } from '../entities/comment.entity';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { GetArticlesDto } from '../dto/get-articles.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
+import { AddArticleCommentDto } from '../dto/add-article-comment.dto';
 
 @Injectable()
 export class ArticleService {
@@ -14,6 +16,8 @@ export class ArticleService {
     private articleRepository: Repository<Article>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Comment)
+    private commentRepository: Repository<Comment>,
   ) {}
 
   async saveArticle(
@@ -86,6 +90,7 @@ export class ArticleService {
           id: true,
           username: true,
           imgUrl: true,
+          isAnonymous: true,
         },
       },
       order: {
@@ -134,6 +139,7 @@ export class ArticleService {
         'author.id',
         'author.username',
         'author.imgUrl',
+        'author.isAnonymous',
       ]);
 
     // 添加排序
@@ -167,16 +173,118 @@ export class ArticleService {
 
   // 获取文章详情
   async getArticleDetail(userId: string, articleId: string) {
-    return await this.articleRepository.findOne({
+    const article = await this.articleRepository.findOne({
       where: { id: articleId, author: { id: userId } },
-      relations: ['author', 'comments'],
+      // 关联关系
+      relations: [
+        'author',
+        'comments',
+        'comments.user', // 关联评论的用户字段
+        'comments.reply_comment', // 评论的回复字段
+        'comments.reply_comment.user', // 回复的用户字段
+      ],
+      order: {
+        comments: {
+          create_time: 'ASC',
+        },
+      },
       select: {
         author: {
           id: true,
           username: true,
           imgUrl: true,
+          isAnonymous: true,
+        },
+        comments: {
+          id: true,
+          content: true,
+          create_time: true,
+          user: {
+            id: true,
+            username: true,
+            imgUrl: true,
+            isAnonymous: true,
+          },
+          reply_comment: {
+            id: true,
+            create_time: true,
+            user: {
+              id: true,
+              username: true,
+              imgUrl: true,
+              isAnonymous: true,
+            },
+          },
         },
       },
     });
+
+    return article;
+  }
+
+  // 新增文章评论
+  async addArticleComment(userId: string, dto: AddArticleCommentDto) {
+    const { content, articleId, replyCommentId } = dto;
+
+    // 查找用户
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('用户不存在');
+    }
+    // 查找文章
+    const article = await this.articleRepository.findOne({
+      where: { id: articleId },
+    });
+    if (!article) {
+      throw new NotFoundException('文章不存在');
+    }
+
+    // 查找被回复的评论（如果有的话）
+    let replyComment = null;
+    if (replyCommentId) {
+      replyComment = await this.commentRepository.findOne({
+        where: { id: replyCommentId },
+        relations: ['article', 'user'],
+      });
+      if (!replyComment) {
+        throw new NotFoundException('被回复的评论不存在');
+      }
+    }
+
+    // 创建新评论
+    const newComment = this.commentRepository.create({
+      content,
+      user,
+      article,
+      reply_comment: replyComment,
+    });
+    const savedComment = await this.commentRepository.save(newComment);
+    // 返回的数据
+    const comment = await this.commentRepository.findOne({
+      where: { id: savedComment.id },
+      relations: ['user', 'reply_comment', 'reply_comment.user'],
+      select: {
+        id: true,
+        content: true,
+        create_time: true,
+        user: {
+          id: true,
+          username: true,
+          imgUrl: true,
+          isAnonymous: true,
+        },
+        reply_comment: {
+          id: true,
+          create_time: true,
+          user: {
+            id: true,
+            username: true,
+            imgUrl: true,
+            isAnonymous: true,
+          },
+        },
+      },
+    });
+    return comment;
   }
 }

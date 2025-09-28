@@ -289,6 +289,9 @@ onMounted(() => {
         'superscript',
         'emoji'
       ],
+      textSelectionBubbleMenu: {
+        enable: false
+      },
       onChange: () => {
         // 当编辑器内容发生变化时，标记为未保存
         isContentSaved.value = false

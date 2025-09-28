@@ -69,24 +69,6 @@
       </div>
       <div v-else class="text-xs text-gray-400 h-20 flex items-center justify-center">暂无数据</div>
     </div>
-
-    <!-- 本周热门标签 -->
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-medium">热门标签</h3>
-        <span class="text-[10px] text-gray-400">本周</span>
-      </div>
-      <div v-if="hotTags && hotTags.length" class="flex flex-wrap gap-2">
-        <span
-          class="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 cursor-pointer transition-colors border border-indigo-100"
-          v-for="tag in hotTags"
-          :key="tag"
-        >
-          #{{ tag }}
-        </span>
-      </div>
-      <div v-else class="text-xs text-gray-400 h-12 flex items-center justify-center">暂无数据</div>
-    </div>
   </div>
 </template>
 
@@ -123,22 +105,6 @@ const hotPosts = ref<HotPost[]>([
   { id: 4, title: '食堂新菜品评测', author: '美食协会', likes: 142 },
   { id: 5, title: '期末考试复习指南', author: '学霸君', likes: 135 }
 ])
-
-const hotTags = ref<string[]>([
-  '校园生活',
-  '学习',
-  '美食',
-  '活动',
-  '摄影',
-  '社团',
-  '考试',
-  '体育'
-])
-
-function calcHeat(user: ActiveUser): number {
-  const max = Math.max(...activeUsers.value.map(u => u.posts || 0), 1)
-  return Math.round((user.posts / max) * 100)
-}
 
 function indexClass(index: number): string {
   if (index === 0) return 'bg-yellow-100 text-yellow-700'

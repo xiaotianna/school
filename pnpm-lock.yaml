@@ -21,7 +21,6 @@ importers:
       lucide-vue-next: ^0.544.0
       normalize.css: ^8.0.1
       pinia: ^3.0.3
-      pinia-plugin-persistedstate: ^4.5.0
       postcss: ^8.5.6
       postcss-loader: ^8.2.0
       prettier: ^3.6.2
@@ -36,6 +35,7 @@ importers:
       vite: ^6.0.5
       vue: ^3.5.21
       vue-router: ^4.5.1
+      vue-star: ^0.0.4
       vue-tsc: ^2.2.0
     dependencies:
       '@tailwindcss/postcss': 4.1.13
@@ -48,7 +48,6 @@ importers:
       lucide-vue-next: 0.544.0_vue@3.5.21
       normalize.css: 8.0.1
       pinia: 3.0.3_d7gdsgyia5umtfa3bi5nyf3ckm
-      pinia-plugin-persistedstate: 4.5.0_pinia@3.0.3
       postcss: 8.5.6
       postcss-loader: 8.2.0_m7wz4kglrbi3motfp2453wotka
       reka-ui: 2.5.0_d7gdsgyia5umtfa3bi5nyf3ckm
@@ -56,6 +55,7 @@ importers:
       tailwindcss-animate: 1.0.7_tailwindcss@3.4.17
       vue: 3.5.21_typescript@5.6.3
       vue-router: 4.5.1_vue@3.5.21
+      vue-star: 0.0.4
     devDependencies:
       '@types/node': 24.5.2
       '@vitejs/plugin-vue': 5.2.4_vite@6.3.6+vue@3.5.21
@@ -4171,10 +4171,6 @@ packages:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
     dev: true
 
-  /deep-pick-omit/1.2.1:
-    resolution: {integrity: sha512-2J6Kc/m3irCeqVG42T+SaUMesaK7oGWaedGnQQK/+O0gYc+2SP5bKh/KKTE7d7SJ+GCA9UUE1GRzh6oDe0EnGw==}
-    dev: false
-
   /deepmerge/4.3.1:
     resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
     engines: {node: '>=0.10.0'}
@@ -4214,10 +4210,6 @@ packages:
   /dequal/2.0.3:
     resolution: {integrity: sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==}
     engines: {node: '>=6'}
-    dev: false
-
-  /destr/2.0.5:
-    resolution: {integrity: sha512-ugFTXCtDZunbzasqBxrK93Ik/DRYsO6S/fedkWEMKqt04xZ4csmnmwGDBAb07QWNaGMAmnTIemsYZCksjATwsA==}
     dev: false
 
   /destroy/1.2.0:
@@ -6777,26 +6769,6 @@ packages:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
     engines: {node: '>=0.10.0'}
 
-  /pinia-plugin-persistedstate/4.5.0_pinia@3.0.3:
-    resolution: {integrity: sha512-QTkP1xJVyCdr2I2p3AKUZM84/e+IS+HktRxKGAIuDzkyaKKV48mQcYkJFVVDuvTxlI5j6X3oZObpqoVB8JnWpw==}
-    peerDependencies:
-      '@nuxt/kit': '>=3.0.0'
-      '@pinia/nuxt': '>=0.10.0'
-      pinia: '>=3.0.0'
-    peerDependenciesMeta:
-      '@nuxt/kit':
-        optional: true
-      '@pinia/nuxt':
-        optional: true
-      pinia:
-        optional: true
-    dependencies:
-      deep-pick-omit: 1.2.1
-      defu: 6.1.4
-      destr: 2.0.5
-      pinia: 3.0.3_d7gdsgyia5umtfa3bi5nyf3ckm
-    dev: false
-
   /pinia/3.0.3_d7gdsgyia5umtfa3bi5nyf3ckm:
     resolution: {integrity: sha512-ttXO/InUULUXkMHpTdp9Fj4hLpD/2AoJdmAbAeW2yu1iy1k+pkFekQXw5VpC0/5p51IOR/jDaDRfRWRnMMsGOA==}
     peerDependencies:
@@ -8449,6 +8421,10 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.6.4
       vue: 3.5.21_typescript@5.6.3
+    dev: false
+
+  /vue-star/0.0.4:
+    resolution: {integrity: sha512-wQ/LRUfeTker8IhbltfOAcQkNO5fWgwUpi8YprQr3SzM3mczt3njS9zmMgvm6gfHQdqkVlAnFR0PZMM/UM2vTw==}
     dev: false
 
   /vue-tsc/2.2.12_typescript@5.6.3:
