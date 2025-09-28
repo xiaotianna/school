@@ -70,7 +70,10 @@
 
           <div class="mt-3 flex items-center gap-4 text-xs text-gray-500">
             <div class="flex items-center gap-1">
-              <span>👍</span>
+              <Heart
+                :size="12"
+                class="fill-red-500 stroke-transparent stroke-0"
+              />
               <span>{{ post.likes ?? 0 }}</span>
             </div>
           </div>
@@ -92,6 +95,7 @@ import { formatTime } from '@/utils/formatTime'
 import { useRouter } from 'vue-router'
 import { getCurrentInstance } from 'vue'
 import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
+import { Heart } from 'lucide-vue-next'
 const { proxy } = getCurrentInstance() as any
 
 type PostItem = {

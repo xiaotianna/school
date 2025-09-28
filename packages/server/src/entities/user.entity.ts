@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Article } from './article.entity';
 import { Comment } from './comment.entity';
+import { Like } from './like.entity';
 
 @Entity()
 export class User {
@@ -64,6 +65,10 @@ export class User {
   // 评论
   @OneToMany(() => Comment, (comment) => comment.id)
   comments: Comment[];
+
+  // 点赞记录
+  @OneToMany(() => Like, (like) => like.user)
+  user_likes: Like[];
 
   // 是否匿名
   @Column({

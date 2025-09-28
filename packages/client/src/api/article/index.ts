@@ -6,7 +6,8 @@ import type {
   MyArticlesResponse,
   DeleteArticleResponse,
   ArticleDetailResponse,
-  CommentResponse
+  CommentResponse,
+  LikeResponse
 } from './type'
 
 enum API {
@@ -15,11 +16,12 @@ enum API {
   PUBLISH = '/article/publish', // 发布
   UPDATE_DRAFT = '/article/draft/update', // 更新草稿
   UPDATE_PUBLISH = '/article/publish/update', // 更新文章
-  ALL = '/article/all',
-  MY = '/article/my',
-  DELETE = '/article',
-  DETAIL = '/article',
-  COMMENT = '/article/comment'
+  ALL = '/article/all', // 获取所有文章
+  MY = '/article/my', // 获取我的文章
+  DELETE = '/article', // 删除文章
+  DETAIL = '/article', // 获取文章详情
+  COMMENT = '/article/comment', // 添加评论
+  LIKE = '/article/like' // 点赞
 }
 
 // 上传图片
@@ -119,4 +121,9 @@ export const reqComment = (data: {
     `${API.COMMENT}/${data.articleId}`,
     data
   )
+}
+
+// 点赞接口（包括取消）
+export const reqLike = (articleId: string) => {
+  return request.post<any, LikeResponse>(`${API.LIKE}/${articleId}`)
 }

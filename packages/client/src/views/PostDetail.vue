@@ -27,8 +27,11 @@
                 <span class="text-xs text-gray-400">·</span>
                 <Skeleton class="h-3 w-20 bg-gray-200" />
               </div>
-              <div class="mt-1 flex items-center gap-2">
-                <span class="text-xs">👍</span>
+              <div class="mt-1 flex items-center gap-1">
+                <Heart
+                  :size="18"
+                  class="fill-red-500 stroke-transparent stroke-0"
+                />
                 <Skeleton class="h-3 w-6 bg-gray-200" />
               </div>
               <div class="mt-3 space-y-2">
@@ -71,9 +74,20 @@
                   formatTime(post.create_time)
                 }}</span>
               </div>
-              <div class="mt-1 text-xs text-gray-500 flex items-center gap-2">
-                <span>👍</span>
-                <span>{{ post.likes ?? 0 }}</span>
+              <div
+                class="mt-1 text-xs w-fit text-gray-500 flex items-center gap-1 cursor-pointer select-none"
+                @click="toggleLike"
+              >
+                <Heart
+                  v-if="post.isLike"
+                  :size="18"
+                  class="fill-red-500 stroke-transparent stroke-0"
+                />
+                <Heart
+                  v-else
+                  :size="18"
+                />
+                <span class="text-base">{{ post.likes ?? 0 }}</span>
               </div>
               <div
                 class="mt-3 whitespace-pre-wrap break-words leading-7 text-[15px] text-gray-800 w-full"
@@ -247,8 +261,8 @@
 import { ref, onMounted, getCurrentInstance, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import CommentItem from '@/components/CommentItem.vue'
-import { ChevronLeft, ChevronRight, X } from 'lucide-vue-next'
-import { getArticleDetail, reqComment } from '@/api/article'
+import { ChevronLeft, ChevronRight, X, Heart } from 'lucide-vue-next'
+import { getArticleDetail, reqComment, reqLike } from '@/api/article'
 import type { ArticleDetailResponse, Comment } from '@/api/article/type'
 import { formatTime } from '@/utils/formatTime'
 import { AiEditor } from 'aieditor'
@@ -259,6 +273,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ElMessage } from 'element-plus'
 import { sortCommentsByHierarchy } from '@/utils/comment'
+import { useThrottleFn } from '@vueuse/core'
 const { proxy } = getCurrentInstance() as any
 
 const route = useRoute()
@@ -277,6 +292,7 @@ type PostItem = {
   tags?: string[]
   create_time: string | number | Date
   likes: number
+  isLike: boolean
 }
 
 // 文章数据
@@ -324,6 +340,7 @@ const fetchArticleDetail = async () => {
         images: data.images,
         tags: data.tags,
         create_time: data.create_time,
+        isLike: data.isLike,
         likes: data.likes
       }
       // 初始化评论数据
@@ -338,6 +355,26 @@ const fetchArticleDetail = async () => {
     loading.value = false
   }
 }
+
+// 点赞（需要做防抖处理）
+const toggleLike = useThrottleFn(async () => {
+  try {
+    const articleId = route.params.id as string
+    let res = await reqLike(articleId)
+    if (res.code === 200) {
+      const isLiked = res.data.isLiked
+      post.value.isLike = isLiked
+      if (isLiked) {
+        post.value.likes += 1
+      } else {
+        post.value.likes -= 1
+      }
+    }
+  } catch (error) {
+    console.error('点赞失败:', error)
+    ElMessage.error('点赞失败')
+  }
+}, 1000)
 
 const commentInput = ref('')
 const replyToComment = ref<Comment | null>(null)

@@ -229,6 +229,10 @@ export class ArticleController {
 
   /**
    * 评论接口
+   * @param userId 用户ID
+   * @param articleId 文章ID
+   * @param content 评论内容
+   * @param replyCommentId 回复的评论ID（可能为null）
    */
   @Post('comment/:articleId')
   async addArticleComment(
@@ -238,5 +242,24 @@ export class ArticleController {
     const userId = (req.user as any).userId;
     const res = await this.articleService.addArticleComment(userId, dto);
     return ResponseData.success(res, '评论成功');
+  }
+
+  /**
+   * 文章点赞接口
+   */
+  @Post('like/:articleId')
+  async toggleArticleLike(
+    @Param('articleId') articleId: string,
+    @NextRequest() req: Request,
+  ) {
+    const userId = (req.user as any).userId;
+    const result = await this.articleService.toggleArticleLike(
+      userId,
+      articleId,
+    );
+    return ResponseData.success(
+      result,
+      result.isLiked ? '点赞成功' : '取消点赞成功',
+    );
   }
 }

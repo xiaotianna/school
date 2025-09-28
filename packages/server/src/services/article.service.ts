@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Article } from '../entities/article.entity';
 import { User } from '../entities/user.entity';
 import { Comment } from '../entities/comment.entity';
+import { Like } from '../entities/like.entity';
 import { CreateArticleDto } from '../dto/create-article.dto';
 import { GetArticlesDto } from '../dto/get-articles.dto';
 import { UpdateArticleDto } from '../dto/update-article.dto';
@@ -18,6 +19,8 @@ export class ArticleService {
     private userRepository: Repository<User>,
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
+    @InjectRepository(Like)
+    private likeRepository: Repository<Like>,
   ) {}
 
   async saveArticle(
@@ -174,7 +177,7 @@ export class ArticleService {
   // 获取文章详情
   async getArticleDetail(userId: string, articleId: string) {
     const article = await this.articleRepository.findOne({
-      where: { id: articleId, author: { id: userId } },
+      where: { id: articleId },
       // 关联关系
       relations: [
         'author',
@@ -219,7 +222,20 @@ export class ArticleService {
       },
     });
 
-    return article;
+    // 检查当前用户是否点赞了这篇文章
+    const existingLike = await this.likeRepository.findOne({
+      where: {
+        user: { id: userId },
+        article: { id: articleId },
+      },
+    });
+
+    const isLike = !!existingLike;
+
+    return {
+      ...article,
+      isLike,
+    };
   }
 
   // 新增文章评论
@@ -286,5 +302,54 @@ export class ArticleService {
       },
     });
     return comment;
+  }
+
+  // 文章点赞/取消点赞
+  async toggleArticleLike(userId: string, articleId: string) {
+    // 查找用户
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('用户不存在');
+    }
+
+    // 查找文章
+    const article = await this.articleRepository.findOne({
+      where: { id: articleId },
+    });
+    if (!article) {
+      throw new NotFoundException('文章不存在');
+    }
+
+    // 检查是否已经点赞
+    const existingLike = await this.likeRepository.findOne({
+      where: {
+        user: { id: userId },
+        article: { id: articleId },
+      },
+    });
+
+    if (existingLike) {
+      // 取消点赞
+      await this.likeRepository.remove(existingLike);
+      article.likes -= 1;
+    } else {
+      // 点赞
+      const like = new Like();
+      like.user = user;
+      like.article = article;
+      await this.likeRepository.save(like);
+      article.likes += 1;
+    }
+
+    // 保存文章
+    await this.articleRepository.save(article);
+
+    // 返回最新的点赞数和点赞状态
+    return {
+      likes: article.likes,
+      isLiked: !existingLike, // 返回新的点赞状态
+    };
   }
 }

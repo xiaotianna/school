@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Comment } from './comment.entity';
+import { Like } from './like.entity';
 
 @Entity()
 export class Article {
@@ -71,6 +72,10 @@ export class Article {
   // 评论
   @OneToMany(() => Comment, (comment) => comment.article)
   comments: Comment[];
+
+  // 点赞记录
+  @OneToMany(() => Like, (like) => like.article)
+  article_likes: Like[];
 
   @BeforeInsert()
   setDefaultValue() {

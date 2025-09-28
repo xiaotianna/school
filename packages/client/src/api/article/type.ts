@@ -38,6 +38,7 @@ export interface Article {
   create_time: string
   update_time: string
   likes: number
+  isLike: boolean
   author: Author
   comments: Comment[]
 }
@@ -75,4 +76,12 @@ export interface DeleteArticleResponse extends Response {
 // 评论响应
 export interface CommentResponse extends Response {
   data: Comment
+}
+
+// 点赞响应
+export interface LikeResponse extends Response {
+  data: {
+    isLiked: boolean
+    likes: number
+  }
 }
