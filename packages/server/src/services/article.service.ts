@@ -420,7 +420,7 @@ export class ArticleService {
     // 格式化返回数据
     return ranking.map((item) => ({
       article: {
-        id: item.article_id,
+        id: item.article_article_id,
         title: item.article_title,
         content: item.article_content,
         images: item.article_images,
@@ -428,7 +428,7 @@ export class ArticleService {
         create_time: item.article_create_time,
       },
       author: {
-        id: item.author_id,
+        id: item.author_user_id,
         username: item.author_username,
         imgUrl: item.author_imgUrl,
         isAnonymous: item.author_isAnonymous,
