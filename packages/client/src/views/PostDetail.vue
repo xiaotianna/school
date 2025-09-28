@@ -258,6 +258,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ElMessage } from 'element-plus'
+import { sortCommentsByHierarchy } from '@/utils/comment'
 const { proxy } = getCurrentInstance() as any
 
 const route = useRoute()
@@ -326,7 +327,7 @@ const fetchArticleDetail = async () => {
         likes: data.likes
       }
       // 初始化评论数据
-      comments.value = data.comments
+      comments.value = sortCommentsByHierarchy(data.comments)
     } else {
       error.value = '获取文章详情失败'
     }
@@ -373,7 +374,7 @@ const submitComment = async () => {
     })
     if (res.code === 200) {
       // 更新评论列表（不采用重新请求的方式）
-      comments.value = [...comments.value, res.data]
+      comments.value = sortCommentsByHierarchy([...comments.value, res.data])
       // 清空输入框
       commentInput.value = ''
       cancelReply()
