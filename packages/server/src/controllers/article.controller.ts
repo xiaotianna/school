@@ -32,6 +32,20 @@ export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
   /**
+   * 搜索接口 - 搜索用户和文章
+   * @param keyword 搜索关键词
+   */
+  @Get('search')
+  async search(@Query('keyword') keyword: string) {
+    try {
+      const results = await this.articleService.search(keyword);
+      return ResponseData.success(results, '搜索成功');
+    } catch (error) {
+      return ResponseData.error(500, '搜索失败: ' + error.message);
+    }
+  }
+
+  /**
    * 获取所有已发布的文章
    * @returns 文章列表
    */

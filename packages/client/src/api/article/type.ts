@@ -1,5 +1,36 @@
 import type { Response } from '../type'
 
+// 搜索结果类型
+export interface SearchUser {
+  id: string
+  nickname: string
+  username: string
+  tags?: string[]
+}
+
+export interface SearchArticle {
+  id: string
+  title: string
+  content: string
+  tags?: string[]
+}
+
+export interface SearchResultUser {
+  type: 'user'
+  user: SearchUser
+}
+
+export interface SearchResultArticle {
+  type: 'article'
+  article: SearchArticle
+}
+
+export type SearchResult = SearchResultUser | SearchResultArticle
+
+export interface SearchResponse extends Response {
+  data: SearchResult[]
+}
+
 export interface UploadImageResponse extends Response {
   data: {
     urls: string[]

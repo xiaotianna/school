@@ -27,7 +27,17 @@ enum API {
   LIKE = '/article/like', // 点赞
   ACTIVE_USERS_RANKING = '/article/ranking/active-users', // 活跃用户榜
   POPULAR_ARTICLES_RANKING = '/article/ranking/popular-articles', // 热门动态榜
-  MESSAGE = '/article/messages' // 消息评论、点赞信息列表接口
+  MESSAGE = '/article/messages', // 消息评论、点赞信息列表接口
+  SEARCH = '/article/search' // 搜索接口
+}
+
+// 搜索接口
+export const search = (keyword: string) => {
+  return request<any, any>({
+    url: API.SEARCH,
+    method: 'get',
+    params: { keyword }
+  })
 }
 
 // 上传图片

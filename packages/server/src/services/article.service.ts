@@ -23,6 +23,137 @@ export class ArticleService {
     private likeRepository: Repository<Like>,
   ) {}
 
+  /**
+   * 搜索用户和文章
+   * @param keyword 搜索关键词
+   * @returns 搜索结果
+   */
+  async search(keyword: string) {
+    if (!keyword || keyword.trim() === '') {
+      return [];
+    }
+
+    // 搜索用户 (用户名匹配)
+    const usersByUsername = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.username LIKE :keyword', { keyword: `%${keyword}%` })
+      .select(['user.id', 'user.username', 'user.tag'])
+      .getMany();
+
+    // 搜索用户 (标签匹配) - 由于数据库限制，需要应用层过滤
+    const usersByTag = await this.searchUsersByTag(keyword);
+
+    // 合并并去重用户结果
+    const userMap = new Map();
+    [...usersByUsername, ...usersByTag].forEach((user) => {
+      userMap.set(user.id, user);
+    });
+    const uniqueUsers = Array.from(userMap.values());
+
+    // 搜索文章 (标题或内容匹配)
+    const articlesByTitleOrContent = await this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.author', 'author')
+      .where('article.title LIKE :keyword', { keyword: `%${keyword}%` })
+      .orWhere('article.content LIKE :keyword', { keyword: `%${keyword}%` })
+      .andWhere('article.status = :status', { status: 1 }) // 只搜索已发布的文章
+      .select([
+        'article.id',
+        'article.title',
+        'article.content',
+        'article.tags',
+        'author.id',
+        'author.username',
+        'author.tag',
+      ])
+      .getMany();
+
+    // 搜索文章 (标签匹配) - 由于数据库限制，需要应用层过滤
+    const articlesByTag = await this.searchArticlesByTag(keyword);
+
+    // 合并并去重文章结果
+    const articleMap = new Map();
+    [...articlesByTitleOrContent, ...articlesByTag].forEach((article) => {
+      articleMap.set(article.id, article);
+    });
+    const uniqueArticles = Array.from(articleMap.values());
+
+    // 格式化结果以匹配前端需要的数据结构
+    const userResults = uniqueUsers.map((user) => ({
+      type: 'user' as const,
+      user: {
+        id: user.id,
+        nickname: user.username,
+        username: user.username,
+        tags: user.tag || [],
+      },
+    }));
+
+    const articleResults = uniqueArticles.map((article) => ({
+      type: 'article' as const,
+      article: {
+        id: article.id,
+        title: article.title,
+        content: article.content,
+        tags: article.tags || [],
+      },
+    }));
+
+    // 合并结果并限制数量
+    const results = [...userResults, ...articleResults];
+    return results.slice(0, 10);
+  }
+
+  /**
+   * 搜索标签匹配的用户
+   * @param keyword 搜索关键词
+   * @returns 匹配的用户列表
+   */
+  private async searchUsersByTag(keyword: string): Promise<User[]> {
+    // 获取所有用户然后在应用层过滤标签
+    const allUsers = await this.userRepository
+      .createQueryBuilder('user')
+      .select(['user.id', 'user.username', 'user.tag'])
+      .getMany();
+
+    return allUsers.filter((user) => {
+      if (!user.tag) return false;
+      return user.tag.some((tag) =>
+        tag.toLowerCase().includes(keyword.toLowerCase()),
+      );
+    });
+  }
+
+  /**
+   * 搜索标签匹配的文章
+   * @param keyword 搜索关键词
+   * @returns 匹配的文章列表
+   */
+  private async searchArticlesByTag(keyword: string): Promise<Article[]> {
+    // 获取所有已发布的文章然后在应用层过滤标签
+    const allPublishedArticles = await this.articleRepository
+      .createQueryBuilder('article')
+      .leftJoinAndSelect('article.author', 'author')
+      .where('article.status = :status', { status: 1 }) // 只搜索已发布的文章
+      .select([
+        'article.id',
+        'article.title',
+        'article.content',
+        'article.tags',
+        'author.id',
+        'author.username',
+        'author.tag',
+      ])
+      .getMany();
+
+    return allPublishedArticles.filter((article) => {
+      if (!article.tags) return false;
+      return article.tags.some((tag) =>
+        tag.toLowerCase().includes(keyword.toLowerCase()),
+      );
+    });
+  }
+
   async saveArticle(
     userId: string,
     createArticleDto: CreateArticleDto,

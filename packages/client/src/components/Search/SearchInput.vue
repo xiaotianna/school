@@ -44,6 +44,7 @@ import { ref, computed } from 'vue'
 import { Input } from '@/components/ui/input'
 import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
 import type { SearchResult } from './type'
+import { search } from '@/api/article'
 
 // 获取标签的辅助函数
 const getTags = (result: SearchResult): string[] => {
@@ -72,63 +73,23 @@ const searchText = computed({
 
 const showSearchResults = ref(false)
 const searchResults = ref<SearchResult[]>([])
-
-// Mock数据
-const mockData = ref<SearchResult[]>([
-  {
-    type: 'user',
-    user: {
-      id: '1',
-      nickname: '张三',
-      username: 'zhangsan',
-      tags: ['前端开发', 'Vue', 'JavaScript']
-    }
-  },
-  {
-    type: 'user',
-    user: {
-      id: '2',
-      nickname: '李四',
-      username: 'lisi',
-      tags: ['后端开发', 'Node.js', '数据库']
-    }
-  },
-  {
-    type: 'article',
-    article: {
-      id: '101',
-      title: 'Vue 3 Composition API 使用指南',
-      content: '<p>Vue 3 Composition API 是 Vue 3 中引入的一种新的组织和复用组件逻辑的方式。它提供了一种更灵活的方式来编写组件代码。</p>',
-      tags: ['Vue', '前端', 'JavaScript']
-    }
-  },
-  {
-    type: 'article',
-    article: {
-      id: '102',
-      title: 'React Hooks 完全指南',
-      content: '<p>React Hooks 是 React 16.8 中引入的新特性，它让你可以在不编写 class 的情况下使用 state 以及其他的 React 特性。</p>',
-      tags: ['React', '前端', 'JavaScript']
-    }
-  },
-  {
-    type: 'article',
-    article: {
-      id: '103',
-      title: 'Node.js 性能优化技巧',
-      content: '<p>在 Node.js 应用中，性能优化是一个重要的话题。本文将介绍一些常见的 Node.js 性能优化技巧。</p>',
-      tags: ['Node.js', '后端', '性能优化']
-    }
-  }
-])
+const searchTimeout = ref<number | null>(null)
 
 const handleInput = (value: string | number) => {
   const stringValue = String(value)
   emit('update:modelValue', stringValue)
   emit('search', stringValue)
   
+  // 清除之前的定时器
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+  
   if (stringValue.trim()) {
-    performSearch(stringValue)
+    // 设置新的定时器，延迟执行搜索
+    searchTimeout.value = window.setTimeout(() => {
+      performSearch(stringValue)
+    }, 300)
     showSearchResults.value = true
   } else {
     searchResults.value = []
@@ -157,33 +118,19 @@ const showSearchResultsContainer = () => {
   }
 }
 
-const performSearch = (keyword: string) => {
+const performSearch = async (keyword: string) => {
   if (!keyword.trim()) {
     searchResults.value = []
     return
   }
 
-  const results = mockData.value.filter(item => {
-    if (item.type === 'user') {
-      const user = item.user
-      // 搜索用户：匹配昵称、用户名和标签
-      return (
-        user.nickname.toLowerCase().includes(keyword.toLowerCase()) ||
-        user.username.toLowerCase().includes(keyword.toLowerCase()) ||
-        (user.tags && user.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())))
-      )
-    } else {
-      const article = item.article
-      // 搜索文章：匹配标题、内容和标签
-      return (
-        article.title.toLowerCase().includes(keyword.toLowerCase()) ||
-        extractTextFromHtml(article.content).toLowerCase().includes(keyword.toLowerCase()) ||
-        (article.tags && article.tags.some(tag => tag.toLowerCase().includes(keyword.toLowerCase())))
-      )
-    }
-  })
-
-  searchResults.value = results.slice(0, 10) // 限制最多显示10个结果
+  try {
+    const response = await search(keyword)
+    searchResults.value = response.data.slice(0, 10) // 限制最多显示10个结果
+  } catch (error) {
+    console.error('搜索失败:', error)
+    searchResults.value = []
+  }
 }
 
 const selectResult = (result: SearchResult) => {
