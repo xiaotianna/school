@@ -260,7 +260,7 @@
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import CommentItem from '@/components/CommentItem.vue'
+import CommentItem from '@/components/CommentItem/index.vue'
 import { ChevronLeft, ChevronRight, X, Heart } from 'lucide-vue-next'
 import { getArticleDetail, reqComment, reqLike } from '@/api/article'
 import type { ArticleDetailResponse, Comment } from '@/api/article/type'
