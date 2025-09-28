@@ -1,10 +1,35 @@
 <template>
   <div class="w-full max-w-6xl mx-auto p-6">
     <div class="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6">
-      <h2 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 mb-6">
+      <h2 class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 !mb-4">
         消息中心
       </h2>
-      
+
+      <!-- 提示 -->
+      <div
+        v-if="currentTabTips"
+        class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800"
+      >
+        <div class="flex items-start">
+          <svg
+            class="flex-shrink-0 w-5 h-5 text-blue-500 dark:text-blue-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <div class="ml-3 text-sm text-blue-700 dark:text-blue-300">
+            {{ currentTabTips }}
+          </div>
+        </div>
+      </div>
+
       <!-- Tab 切换 -->
       <div class="border-b border-zinc-200 dark:border-zinc-800 mb-6">
         <nav class="flex space-x-6">
@@ -23,42 +48,55 @@
           </button>
         </nav>
       </div>
-      
+
       <!-- 消息列表 -->
       <div class="space-y-4">
         <div
-          v-for="message in filteredMessages"
-          :key="message.id"
-          class="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors duration-200"
+          v-for="(message, idx) in messages"
+          :key="message.article_id + idx"
+          class="p-4 rounded-lg cursor-pointer border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors duration-200"
+          @click="goTo(message)"
         >
           <div class="flex items-start gap-3">
+            <!-- 匿名用户头像处理 -->
+            <div
+              v-if="message.user_isAnonymous"
+              class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+              @click.stop="$router.push(`/user/${message.user_id}`)"
+            >
+              <span class="text-gray-500 dark:text-gray-400 text-xs">匿</span>
+            </div>
             <img
-              :src="message.user.avatar"
-              :alt="message.user.name"
+              v-else
+              :src="proxy.$baseUrl + message.user_imgUrl"
+              :alt="message.user_imgUrl"
               class="w-10 h-10 rounded-full object-cover"
             />
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                  {{ message.user.name }}
+                <!-- 匿名用户名处理 -->
+                <span
+                  class="text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                >
+                  {{ message.user_isAnonymous ? '匿名用户' : message.username }}
                 </span>
                 <span class="text-xs text-zinc-500 dark:text-zinc-400">
-                  {{ message.time }}
+                  {{ formatTime(message.create_time) }}
                 </span>
               </div>
               <p class="text-sm text-zinc-700 dark:text-zinc-300">
-                {{ message.content }}
+                {{ activeTab === 'replies' ? message.content : '赞了你的文章' }}
               </p>
               <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                来自: {{ message.source }}
+                来自: {{ message.article_title }}
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- 空状态 -->
         <div
-          v-if="filteredMessages.length === 0"
+          v-if="messages.length === 0"
           class="text-center py-12"
         >
           <svg
@@ -87,78 +125,74 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { reqGetMessages } from '@/api/article'
+import type { Message } from '@/api/article/type'
+import { formatTime } from '@/utils/formatTime'
+import { ElMessage } from 'element-plus'
+import { ref, onMounted, watch, computed, getCurrentInstance } from 'vue'
+import { useRouter } from 'vue-router'
+const { proxy } = getCurrentInstance() as any
+const router = useRouter()
 
 // Tab 数据
 const tabs = [
-  { id: 'replies', name: '消息回复' },
-  { id: 'likes', name: '点赞回复' }
+  { id: 'replies', name: '消息回复', tips: '点击跳转进行回复' },
+  { id: 'likes', name: '点赞信息', tips: '点击跳转查看详情' }
 ]
 
 // 当前激活的 tab
 const activeTab = ref('replies')
+// 回复消息列表
+const repliesMessages = ref<Message[]>([])
+// 点赞信息列表
+const likesMessages = ref<Message[]>([])
+// 展示的消息列表
+const messages = ref<Message[]>([])
 
-// 模拟消息数据
-const messages = [
-  {
-    id: 1,
-    type: 'replies',
-    user: {
-      name: '张三',
-      avatar: 'https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png'
-    },
-    content: '你的帖子写得真好，学到了很多新知识！',
-    time: '2小时前',
-    source: '帖子《Vue 3实战技巧分享》'
-  },
-  {
-    id: 2,
-    type: 'replies',
-    user: {
-      name: '李四',
-      avatar: 'https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png'
-    },
-    content: '感谢分享，这个解决方案对我帮助很大',
-    time: '5小时前',
-    source: '帖子《React性能优化指南》'
-  },
-  {
-    id: 3,
-    type: 'likes',
-    user: {
-      name: '王五',
-      avatar: 'https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png'
-    },
-    content: '赞了你的评论',
-    time: '1天前',
-    source: '帖子《前端工程化实践》下的评论'
-  },
-  {
-    id: 4,
-    type: 'likes',
-    user: {
-      name: '赵六',
-      avatar: 'https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png'
-    },
-    content: '赞了你的帖子',
-    time: '2天前',
-    source: '帖子《TypeScript高级技巧》'
-  },
-  {
-    id: 5,
-    type: 'replies',
-    user: {
-      name: '孙七',
-      avatar: 'https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-02-albo9B0tWOSLXCVZh9rX9KFxXIVWMr.png'
-    },
-    content: '请问这个问题你是怎么解决的？能详细说说吗？',
-    time: '3天前',
-    source: '帖子《Webpack配置优化》'
-  }
-]
-
-// 根据当前激活的 tab 过滤消息
-const filteredMessages = computed(() => {
-  return messages.filter(message => message.type === activeTab.value)
+// 计算当前标签页的提示信息
+const currentTabTips = computed(() => {
+  const currentTab = tabs.find((tab) => tab.id === activeTab.value)
+  return currentTab ? currentTab.tips : ''
 })
+
+watch(
+  () => activeTab.value,
+  () => {
+    renderMessage()
+  }
+)
+
+const renderMessage = () => {
+  messages.value =
+    activeTab.value === 'replies' ? repliesMessages.value : likesMessages.value
+}
+
+onMounted(() => {
+  getMessages()
+})
+
+const getMessages = async () => {
+  try {
+    let res = await reqGetMessages()
+    if (res.code === 200) {
+      repliesMessages.value = res.data.commentMessages
+      likesMessages.value = res.data.likeMessages
+      renderMessage()
+    }
+  } catch (error) {
+    console.error('加载失败:', error)
+    ElMessage.error('加载失败')
+  }
+}
+
+const goTo = (message: Message) => {
+  if (activeTab.value === 'replies' && message.id) {
+    // message.id为评论id
+    // 对于回复消息，跳转到文章详情页并定位到具体评论
+    router.push(`/post/${message.article_id}?commentId=${message.id}`)
+  } else {
+    // 对于点赞消息，只跳转到文章详情页
+    router.push(`/post/${message.article_id}`)
+  }
+}
 </script>

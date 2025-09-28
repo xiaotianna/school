@@ -39,6 +39,6 @@ export const reqUploadAvatar = (file: File) => {
 }
 
 // 用户主页信息接口
-export const reqUserProfile = () => {
-  return request.get<any, GetUserProfileResponse>(API.PROFILE)
+export const reqUserProfile = (userId: string) => {
+  return request.get<any, GetUserProfileResponse>(API.PROFILE + `/${userId}`)
 }

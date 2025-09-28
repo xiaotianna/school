@@ -316,6 +316,8 @@ onMounted(async () => {
         content: post.value.content
       })
     }
+    // 添加定位到评论的功能
+    scrollToComment()
   })
 })
 
@@ -353,6 +355,32 @@ const fetchArticleDetail = async () => {
     error.value = '获取文章详情失败'
   } finally {
     loading.value = false
+  }
+}
+
+// 定位到指定评论
+const scrollToComment = () => {
+  const commentId = route.query.commentId as string
+  if (commentId) {
+    // 等待DOM更新后执行滚动
+    nextTick(() => {
+      const commentElement = document.getElementById(`comment-${commentId}`)
+      if (commentElement) {
+        commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // 添加高亮效果
+        commentElement.classList.add('bg-blue-50', 'dark:bg-blue-900/20')
+        setTimeout(() => {
+          commentElement.classList.remove('bg-blue-50', 'dark:bg-blue-900/20')
+        }, 2000)
+      }
+      // 从URL中移除commentId参数
+      router.replace({
+        query: {
+          ...route.query,
+          commentId: undefined
+        }
+      })
+    })
   }
 }
 

@@ -9,7 +9,8 @@ import type {
   CommentResponse,
   LikeResponse,
   ActiveUsersRankingResponse,
-  PopularArticlesRankingResponse
+  PopularArticlesRankingResponse,
+  MessageResponse
 } from './type'
 
 enum API {
@@ -21,11 +22,12 @@ enum API {
   ALL = '/article/all', // 获取所有文章
   MY = '/article/my', // 获取我的文章
   DELETE = '/article', // 删除文章
-  DETAIL = '/article', // 获取文章详情
+  DETAIL = '/article/details', // 获取文章详情
   COMMENT = '/article/comment', // 添加评论
   LIKE = '/article/like', // 点赞
   ACTIVE_USERS_RANKING = '/article/ranking/active-users', // 活跃用户榜
-  POPULAR_ARTICLES_RANKING = '/article/ranking/popular-articles' // 热门动态榜
+  POPULAR_ARTICLES_RANKING = '/article/ranking/popular-articles', // 热门动态榜
+  MESSAGE = '/article/messages' // 消息评论、点赞信息列表接口
 }
 
 // 上传图片
@@ -146,4 +148,9 @@ export const getPopularArticlesRanking = () => {
     url: API.POPULAR_ARTICLES_RANKING,
     method: 'get'
   })
+}
+
+// 点赞、回复消息接口
+export const reqGetMessages = () => {
+  return request.get<any, MessageResponse>(API.MESSAGE)
 }

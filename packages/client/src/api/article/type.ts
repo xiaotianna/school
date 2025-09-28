@@ -115,3 +115,23 @@ export interface ActiveUsersRankingResponse extends Response {
 export interface PopularArticlesRankingResponse extends Response {
   data: PopularArticleRanking[]
 }
+
+// 消息基础类型（点赞信息没有id和content字段）
+export interface Message {
+  id?: string
+  content?: string
+  create_time: string
+  user_id: string
+  username: string
+  user_imgUrl: string
+  user_isAnonymous: boolean
+  article_id: string
+  article_title: string
+}
+
+export interface MessageResponse extends Response {
+  data: {
+    commentMessages: Message[]
+    likeMessages: Message[]
+  }
+}

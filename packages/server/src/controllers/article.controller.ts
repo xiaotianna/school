@@ -214,7 +214,7 @@ export class ArticleController {
    * 获取文章详情接口
    * @param userId 用户ID
    */
-  @Get(':id')
+  @Get('details/:id')
   async getArticleDetail(
     @Param('id') articleId: string,
     @NextRequest() req: Request,
@@ -279,5 +279,28 @@ export class ArticleController {
   async getPopularArticlesRanking() {
     const ranking = await this.articleService.getPopularArticlesRanking();
     return ResponseData.success(ranking, '获取热门动态榜成功');
+  }
+
+  /**
+   * 消息评论、点赞信息列表接口
+   */
+  @Get('messages')
+  async getMessages(@NextRequest() req: Request) {
+    const userId = (req.user as any).userId;
+
+    // 获取评论消息
+    const commentMessages =
+      await this.articleService.getCommentMessages(userId);
+
+    // 获取点赞消息
+    const likeMessages = await this.articleService.getLikeMessages(userId);
+
+    return ResponseData.success(
+      {
+        commentMessages,
+        likeMessages,
+      },
+      '获取消息列表成功',
+    );
   }
 }

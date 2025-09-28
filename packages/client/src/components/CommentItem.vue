@@ -1,5 +1,6 @@
 <template>
   <div
+    :id="`comment-${comment.id}`"
     class="flex gap-3"
     :class="comment.reply_comment ? 'ml-2 pl-4 border-l border-gray-100' : ''"
   >

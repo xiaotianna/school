@@ -436,4 +436,72 @@ export class ArticleService {
       likeCount: parseInt(item.likeCount, 10),
     }));
   }
+
+  // 获取用户的评论消息列表
+  async getCommentMessages(userId: string) {
+    const comments = await this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.article', 'article')
+      .leftJoinAndSelect('comment.user', 'user')
+      .select([
+        'comment.id',
+        'comment.content',
+        'comment.create_time',
+        'user.id',
+        'user.username',
+        'user.imgUrl',
+        'user.isAnonymous',
+        'article.id',
+        'article.title',
+      ])
+      .where('article.author.id = :userId', { userId })
+      .andWhere('comment.user.id != :userId', { userId }) // 排除自己对自己的评论
+      .orderBy('comment.create_time', 'DESC')
+      .getMany();
+
+    // 格式化返回数据（扁平化结构）
+    return comments.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      create_time: comment.create_time,
+      user_id: comment.user.id,
+      username: comment.user.username,
+      user_imgUrl: comment.user.imgUrl,
+      user_isAnonymous: comment.user.isAnonymous,
+      article_id: comment.article.id,
+      article_title: comment.article.title,
+    }));
+  }
+
+  // 获取用户的点赞消息列表
+  async getLikeMessages(userId: string) {
+    const likes = await this.likeRepository
+      .createQueryBuilder('like')
+      .leftJoinAndSelect('like.article', 'article')
+      .leftJoinAndSelect('like.user', 'user')
+      .select([
+        'like.create_time',
+        'user.id',
+        'user.username',
+        'user.imgUrl',
+        'user.isAnonymous',
+        'article.id',
+        'article.title',
+      ])
+      .where('article.author.id = :userId', { userId })
+      .andWhere('like.user.id != :userId', { userId }) // 排除自己对自己的点赞
+      .orderBy('like.create_time', 'DESC')
+      .getMany();
+
+    // 格式化返回数据（扁平化结构）
+    return likes.map((like) => ({
+      create_time: like.create_time,
+      user_id: like.user.id,
+      username: like.user.username,
+      user_imgUrl: like.user.imgUrl,
+      user_isAnonymous: like.user.isAnonymous,
+      article_id: like.article.id,
+      article_title: like.article.title,
+    }));
+  }
 }

@@ -8,7 +8,6 @@ import {
   Post,
   UseInterceptors,
   UploadedFile,
-  Request as NextRequest,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
 import { User } from '../entities/user.entity';
@@ -18,7 +17,6 @@ import { JwtGuard } from '../guards/jwt.guard';
 import { FileTypeDecorator } from '../decorators/file-type.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileObject } from '../types/file';
-import type { Request } from 'express';
 
 @Controller('user')
 @UseGuards(JwtGuard)
@@ -30,9 +28,8 @@ export class UserController {
    * 必须写在前面（不然会匹配到/:id路由）
    * @param id 用户ID
    */
-  @Get('profile')
-  async getUserProfile(@NextRequest() req: Request) {
-    const userId = (req.user as any).userId;
+  @Get('profile/:userId')
+  async getUserProfile(@Param('userId') userId: string) {
     const res = await this.userService.getUserProfileWithRecentArticles(userId);
     return ResponseData.success(res);
   }

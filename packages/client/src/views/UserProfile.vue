@@ -35,10 +35,15 @@
           </div>
           <div>
             <div class="text-base font-medium">
-              {{ profile?.isAnonymous ? '匿名用户' : (profile?.username || 'User') }}
+              {{
+                profile?.isAnonymous ? '匿名用户' : profile?.username || 'User'
+              }}
             </div>
             <!-- 非匿名用户才显示性别 -->
-            <div v-if="!profile?.isAnonymous" class="text-xs text-gray-500 mt-1">
+            <div
+              v-if="!profile?.isAnonymous"
+              class="text-xs text-gray-500 mt-1"
+            >
               性别：{{ getGenderText(profile?.sex) }}
             </div>
             <!-- 非匿名用户才显示标签 -->
@@ -106,7 +111,9 @@
       <div class="flex-1 bg-white p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-lg font-medium">最近文章</h2>
-          <div class="text-sm text-gray-500">共 {{ profile?.articleCount || 0 }} 篇</div>
+          <div class="text-sm text-gray-500">
+            共 {{ profile?.articleCount || 0 }} 篇
+          </div>
         </div>
 
         <div class="space-y-4">
@@ -122,7 +129,9 @@
               {{ article.title }}
             </h3>
             <p class="text-sm text-gray-600 mt-1 truncate max-w-[60vw]">
-              {{ extractTextFromHtml(article.content) }}121232132132312313123232323232332323nnmasndmandmnasdmandnsdamndmnm
+              {{
+                extractTextFromHtml(article.content)
+              }}121232132132312313123232323232332323nnmasndmandmnasdmandnsdamndmnm
             </p>
             <div
               class="flex items-center justify-between mt-2 text-xs text-gray-500"
@@ -147,7 +156,9 @@ import { reqUserProfile } from '@/api/user'
 import type { ProfileArticle, UserInfo } from '@/api/user/type'
 import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
 import { formatTime } from '@/utils/formatTime'
+import { useRoute } from 'vue-router'
 const { proxy } = getCurrentInstance() as any
+const route = useRoute()
 
 // 用户信息
 const profile = ref<UserInfo>()
@@ -159,7 +170,7 @@ onMounted(() => {
 })
 
 const getUserProfile = async () => {
-  const res = await reqUserProfile()
+  const res = await reqUserProfile(route.params.id as string)
   if (res.code === 200) {
     profile.value = res.data.user
     articles.value = res.data.articles
