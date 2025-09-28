@@ -65,9 +65,12 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { X } from 'lucide-vue-next'
 import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
 import type { SearchResult } from './type';
+
+const router = useRouter()
 
 defineProps<{
   results: SearchResult[]
@@ -85,6 +88,13 @@ const close = () => {
 
 const selectResult = (result: SearchResult) => {
   emit('select', result)
+  
+  // 跳转到对应的详情页
+  if (result.type === 'user') {
+    router.push(`/user/${result.user.id}`)
+  } else {
+    router.push(`/post/${result.article.id}`)
+  }
 }
 
 const highlightText = (text: string, keyword: string) => {

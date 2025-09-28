@@ -41,10 +41,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { Input } from '@/components/ui/input'
 import { extractTextFromHtml } from '@/utils/extractTextFromHtml'
 import type { SearchResult } from './type'
 import { search } from '@/api/article'
+
+const router = useRouter()
 
 // 获取标签的辅助函数
 const getTags = (result: SearchResult): string[] => {
@@ -136,6 +139,13 @@ const performSearch = async (keyword: string) => {
 const selectResult = (result: SearchResult) => {
   showSearchResults.value = false
   emit('select', result)
+  
+  // 跳转到对应的详情页
+  if (result.type === 'user') {
+    router.push(`/user/${result.user.id}`)
+  } else {
+    router.push(`/post/${result.article.id}`)
+  }
 }
 
 const highlightText = (text: string, keyword: string) => {
