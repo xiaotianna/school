@@ -34,11 +34,16 @@
           <div
             class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center overflow-hidden"
           >
-            <img :src="proxy.$baseUrl + user.imgUrl" />
+            <!-- 匿名用户显示特殊头像 -->
+            <div v-if="user.isAnonymous" class="w-full h-full text-xs bg-gray-200 flex items-center justify-center text-gray-500">
+              匿
+            </div>
+            <!-- 非匿名用户显示真实头像 -->
+            <img v-else :src="proxy.$baseUrl + user.imgUrl" />
           </div>
           <div class="flex-1 max-w-[150px]">
             <p class="text-sm font-medium truncate min-w-0">
-              {{ user.username }}
+              {{ user.isAnonymous ? '匿名用户' : user.username }}
             </p>
           </div>
           <div class="text-xs text-muted-foreground">

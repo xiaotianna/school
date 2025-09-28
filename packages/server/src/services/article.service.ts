@@ -416,7 +416,6 @@ export class ArticleService {
       .orderBy('likeCount', 'DESC')
       .limit(10)
       .getRawMany();
-    console.log(ranking);
 
     // 格式化返回数据
     return ranking.map((item) => ({

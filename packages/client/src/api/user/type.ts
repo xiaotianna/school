@@ -1,3 +1,4 @@
+import type { Article } from '../article/type'
 import type { Response } from '../type'
 
 export interface UserInfo {
@@ -9,6 +10,9 @@ export interface UserInfo {
   sign: string
   tag: string[]
   isAnonymous: boolean
+  articleCount?: number
+  commentCount?: number
+  likeCount?: number
 }
 
 export interface UpdateUserInfo {
@@ -31,5 +35,17 @@ export interface UpdateUserResponse extends Response {
 export interface UploadAvatarResponse extends Response {
   data: {
     url: string
+  }
+}
+
+// 用户主页的文章类型，包含评论数量
+export type ProfileArticle = Omit<Article, 'comments'> & {
+  commentCount: number
+}
+
+export interface GetUserProfileResponse extends Response {
+  data: {
+    user: UserInfo
+    articles: ProfileArticle[]
   }
 }

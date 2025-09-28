@@ -167,7 +167,6 @@
                   v-model="newTag"
                   type="text"
                   placeholder="输入标签"
-                  @keyup.enter="addTag"
                   class="flex-1"
                 />
                 <Button

@@ -21,6 +21,7 @@
           <div
             v-else
             class="w-10 h-10 rounded-full bg-gray-200 shrink-0 flex items-center justify-center text-xs text-gray-500"
+            @click.stop="goProfile(post.userId)"
           >
             {{ post.isAnonymous ? '匿' : (post.nickname?.[0] ?? 'U') }}
           </div>
