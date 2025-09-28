@@ -3,7 +3,12 @@
     <div class="flex-1 flex flex-col">
       <header class="h-14 border-b px-4 flex items-center justify-between">
         <h1 class="text-sm font-medium">全部动态</h1>
-        <Input placeholder="搜索" class="!w-52" />
+        <SearchInput 
+          v-model="searchText" 
+          @search="handleSearch"
+          @select="handleSelectResult"
+          @show-results="showSearchResults"
+        />
       </header>
       <ScrollWrapper>
         <PostList :posts="posts" />
@@ -18,6 +23,15 @@
       </ScrollWrapper>
     </div>
   </div>
+  
+  <!-- 搜索结果容器 -->
+  <SearchResult 
+    v-if="showSearchContainer"
+    :results="searchResults"
+    :keyword="searchKeyword"
+    @close="closeSearchResults"
+    @select="handleSelectResult"
+  />
 </template>
 
 <script setup lang="ts">
@@ -25,7 +39,8 @@ import { ref, onMounted } from 'vue'
 import ScrollWrapper from '@/components/ScrollWrapper/index.vue'
 import PostList from '@/components/PostList/index.vue'
 import RankingList from '@/components/RankingList/index.vue'
-import { Input } from '@/components/ui/input'
+import SearchInput from '@/components/Search/SearchInput.vue'
+import SearchResult from '@/components/Search/SearchResult.vue'
 import { getAllArticles } from '@/api/article'
 import { getActiveUsersRanking, getPopularArticlesRanking } from '@/api/article'
 import { ElMessage } from 'element-plus'
@@ -33,6 +48,12 @@ import { ElMessage } from 'element-plus'
 const posts = ref<any[]>([])
 const activeUsers = ref<any[]>([])
 const popularArticles = ref<any[]>([])
+const searchText = ref('')
+
+// 搜索结果相关
+const showSearchContainer = ref(false)
+const searchResults = ref<any[]>([])
+const searchKeyword = ref('')
 
 // 获取所有文章
 const fetchAllArticles = async () => {
@@ -103,6 +124,31 @@ const initializeData = async () => {
     fetchAllArticles(),
     fetchRankingData()
   ])
+}
+
+// 处理搜索事件
+const handleSearch = (keyword: string) => {
+  console.log('搜索关键词:', keyword)
+  // 这里可以添加实际的搜索逻辑
+}
+
+// 处理选择搜索结果事件
+const handleSelectResult = (result: any) => {
+  console.log('选择的搜索结果:', result)
+  // 这里可以添加处理选中结果的逻辑
+  closeSearchResults()
+}
+
+// 显示搜索结果容器
+const showSearchResults = (data: { results: any[]; keyword: string }) => {
+  searchResults.value = data.results
+  searchKeyword.value = data.keyword
+  showSearchContainer.value = true
+}
+
+// 关闭搜索结果容器
+const closeSearchResults = () => {
+  showSearchContainer.value = false
 }
 
 onMounted(() => {
