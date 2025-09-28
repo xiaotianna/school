@@ -68,6 +68,7 @@
 
           <form
             @submit.prevent="updateProfile"
+            @keydown.enter.prevent
             class="space-y-6"
           >
             <!-- 头像 -->
@@ -173,6 +174,7 @@
                   type="button"
                   @click="addTag"
                   variant="outline"
+                  @keydown.enter.prevent
                 >
                   添加
                 </Button>
@@ -184,6 +186,7 @@
               <Button
                 type="submit"
                 class="flex-1"
+                @keydown.enter.prevent
                 >保存</Button
               >
             </div>

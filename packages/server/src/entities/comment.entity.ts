@@ -31,12 +31,15 @@ export class Comment {
   user: User;
 
   // 文章id
-  @ManyToOne(() => Article, (article) => article.comments)
+  @ManyToOne(() => Article, (article) => article.comments, {
+    onDelete: 'CASCADE',
+  })
   article: Article;
 
   // 回复的评论id（如果没有回复，则为null）
   @ManyToOne(() => Comment, (comment) => comment.article, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
   reply_comment: Comment | null;
 }
