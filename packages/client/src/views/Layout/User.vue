@@ -103,6 +103,7 @@
                 v-model="formData.name"
                 type="text"
                 required
+                maxlength="20"
               />
             </div>
 

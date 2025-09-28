@@ -174,6 +174,55 @@ export class ArticleService {
     }
   }
 
+  // 文章点赞/取消点赞
+  async toggleArticleLike(userId: string, articleId: string) {
+    // 查找用户
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('用户不存在');
+    }
+
+    // 查找文章
+    const article = await this.articleRepository.findOne({
+      where: { id: articleId },
+    });
+    if (!article) {
+      throw new NotFoundException('文章不存在');
+    }
+
+    // 检查是否已经点赞
+    const existingLike = await this.likeRepository.findOne({
+      where: {
+        user: { id: userId },
+        article: { id: articleId },
+      },
+    });
+
+    if (existingLike) {
+      // 取消点赞
+      await this.likeRepository.remove(existingLike);
+      article.likes -= 1;
+    } else {
+      // 点赞
+      const like = new Like();
+      like.user = user;
+      like.article = article;
+      await this.likeRepository.save(like);
+      article.likes += 1;
+    }
+
+    // 保存文章
+    await this.articleRepository.save(article);
+
+    // 返回最新的点赞数和点赞状态
+    return {
+      likes: article.likes,
+      isLiked: !existingLike, // 返回新的点赞状态
+    };
+  }
+
   // 获取文章详情
   async getArticleDetail(userId: string, articleId: string) {
     const article = await this.articleRepository.findOne({
@@ -304,52 +353,88 @@ export class ArticleService {
     return comment;
   }
 
-  // 文章点赞/取消点赞
-  async toggleArticleLike(userId: string, articleId: string) {
-    // 查找用户
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new NotFoundException('用户不存在');
-    }
+  // 活跃用户榜 - 获取近7天文章点赞总数最多的用户
+  async getActiveUsersRanking() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // 查找文章
-    const article = await this.articleRepository.findOne({
-      where: { id: articleId },
-    });
-    if (!article) {
-      throw new NotFoundException('文章不存在');
-    }
+    const ranking = await this.likeRepository
+      .createQueryBuilder('like')
+      .leftJoinAndSelect('like.article', 'article')
+      .leftJoinAndSelect('article.author', 'author')
+      .select([
+        'author.id',
+        'author.username',
+        'author.imgUrl',
+        'author.isAnonymous',
+        'COUNT(like.id) as likeCount',
+      ])
+      .where('like.create_time >= :sevenDaysAgo', { sevenDaysAgo })
+      .groupBy('author.id, author.username, author.imgUrl, author.isAnonymous')
+      .orderBy('likeCount', 'DESC')
+      .limit(10)
+      .getRawMany();
 
-    // 检查是否已经点赞
-    const existingLike = await this.likeRepository.findOne({
-      where: {
-        user: { id: userId },
-        article: { id: articleId },
+    // 格式化返回数据
+    return ranking.map((item) => ({
+      user: {
+        id: item.author_user_id,
+        username: item.author_username,
+        imgUrl: item.author_imgUrl,
+        isAnonymous: item.author_isAnonymous,
       },
-    });
+      likeCount: parseInt(item.likeCount, 10),
+    }));
+  }
 
-    if (existingLike) {
-      // 取消点赞
-      await this.likeRepository.remove(existingLike);
-      article.likes -= 1;
-    } else {
-      // 点赞
-      const like = new Like();
-      like.user = user;
-      like.article = article;
-      await this.likeRepository.save(like);
-      article.likes += 1;
-    }
+  // 热门动态榜 - 获取近3天点赞最多的文章
+  async getPopularArticlesRanking() {
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
-    // 保存文章
-    await this.articleRepository.save(article);
+    const ranking = await this.likeRepository
+      .createQueryBuilder('like')
+      .leftJoinAndSelect('like.article', 'article')
+      .leftJoinAndSelect('article.author', 'author')
+      .select([
+        'article.id',
+        'article.title',
+        'article.content',
+        'article.images',
+        'article.tags',
+        'article.create_time',
+        'author.id',
+        'author.username',
+        'author.imgUrl',
+        'author.isAnonymous',
+        'COUNT(like.id) as likeCount',
+      ])
+      .where('like.create_time >= :threeDaysAgo', { threeDaysAgo })
+      .groupBy(
+        'article.id, article.title, article.content, article.images, article.tags, article.create_time, author.id, author.username, author.imgUrl, author.isAnonymous',
+      )
+      .orderBy('likeCount', 'DESC')
+      .limit(10)
+      .getRawMany();
+    console.log(ranking);
 
-    // 返回最新的点赞数和点赞状态
-    return {
-      likes: article.likes,
-      isLiked: !existingLike, // 返回新的点赞状态
-    };
+    // 格式化返回数据
+    return ranking.map((item) => ({
+      article: {
+        id: item.article_id,
+        title: item.article_title,
+        content: item.article_content,
+        images: item.article_images,
+        tags: item.article_tags,
+        create_time: item.article_create_time,
+      },
+      author: {
+        id: item.author_id,
+        username: item.author_username,
+        imgUrl: item.author_imgUrl,
+        isAnonymous: item.author_isAnonymous,
+      },
+      likeCount: parseInt(item.likeCount, 10),
+    }));
   }
 }

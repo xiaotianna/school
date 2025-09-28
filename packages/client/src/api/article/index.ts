@@ -7,7 +7,9 @@ import type {
   DeleteArticleResponse,
   ArticleDetailResponse,
   CommentResponse,
-  LikeResponse
+  LikeResponse,
+  ActiveUsersRankingResponse,
+  PopularArticlesRankingResponse
 } from './type'
 
 enum API {
@@ -21,7 +23,9 @@ enum API {
   DELETE = '/article', // 删除文章
   DETAIL = '/article', // 获取文章详情
   COMMENT = '/article/comment', // 添加评论
-  LIKE = '/article/like' // 点赞
+  LIKE = '/article/like', // 点赞
+  ACTIVE_USERS_RANKING = '/article/ranking/active-users', // 活跃用户榜
+  POPULAR_ARTICLES_RANKING = '/article/ranking/popular-articles' // 热门动态榜
 }
 
 // 上传图片
@@ -126,4 +130,20 @@ export const reqComment = (data: {
 // 点赞接口（包括取消）
 export const reqLike = (articleId: string) => {
   return request.post<any, LikeResponse>(`${API.LIKE}/${articleId}`)
+}
+
+// 活跃用户榜接口
+export const getActiveUsersRanking = () => {
+  return request<any, ActiveUsersRankingResponse>({
+    url: API.ACTIVE_USERS_RANKING,
+    method: 'get'
+  })
+}
+
+// 热门动态榜接口
+export const getPopularArticlesRanking = () => {
+  return request<any, PopularArticlesRankingResponse>({
+    url: API.POPULAR_ARTICLES_RANKING,
+    method: 'get'
+  })
 }

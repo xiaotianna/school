@@ -262,4 +262,22 @@ export class ArticleController {
       result.isLiked ? '点赞成功' : '取消点赞成功',
     );
   }
+
+  /**
+   * 活跃用户榜接口 - 获取近7天文章点赞总数最多的用户
+   */
+  @Get('ranking/active-users')
+  async getActiveUsersRanking() {
+    const ranking = await this.articleService.getActiveUsersRanking();
+    return ResponseData.success(ranking, '获取活跃用户榜成功');
+  }
+
+  /**
+   * 热门动态榜接口 - 获取近3天点赞最多的文章
+   */
+  @Get('ranking/popular-articles')
+  async getPopularArticlesRanking() {
+    const ranking = await this.articleService.getPopularArticlesRanking();
+    return ResponseData.success(ranking, '获取热门动态榜成功');
+  }
 }

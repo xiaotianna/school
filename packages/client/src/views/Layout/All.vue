@@ -14,7 +14,7 @@
         <h2 class="text-sm font-medium">🏆 排行榜</h2>
       </div>
       <ScrollWrapper>
-        <RankingList />
+        <RankingList :active-users="activeUsers" :popular-articles="popularArticles" />
       </ScrollWrapper>
     </div>
   </div>
@@ -27,9 +27,12 @@ import PostList from '@/components/PostList/index.vue'
 import RankingList from '@/components/RankingList/index.vue'
 import { Input } from '@/components/ui/input'
 import { getAllArticles } from '@/api/article'
+import { getActiveUsersRanking, getPopularArticlesRanking } from '@/api/article'
 import { ElMessage } from 'element-plus'
 
 const posts = ref<any[]>([])
+const activeUsers = ref<any[]>([])
+const popularArticles = ref<any[]>([])
 
 // 获取所有文章
 const fetchAllArticles = async () => {
@@ -58,8 +61,52 @@ const fetchAllArticles = async () => {
   }
 }
 
+// 获取排行榜数据
+const fetchRankingData = async () => {
+  try {
+    // 使用Promise.all并行获取活跃用户榜和热门动态榜数据
+    const [activeUsersResponse, popularArticlesResponse] = await Promise.all([
+      getActiveUsersRanking(),
+      getPopularArticlesRanking()
+    ])
+
+    // 处理活跃用户榜数据
+    if (activeUsersResponse.code === 200) {
+      activeUsers.value = activeUsersResponse.data.map(item => ({
+        ...item.user,
+        likeCount: item.likeCount
+      }))
+    } else {
+      ElMessage.error('获取活跃用户榜失败: ' + activeUsersResponse.message)
+    }
+
+    // 处理热门动态榜数据
+    if (popularArticlesResponse.code === 200) {
+      popularArticles.value = popularArticlesResponse.data.map(item => ({
+        ...item.article,
+        author: item.author,
+        likeCount: item.likeCount
+      }))
+    } else {
+      ElMessage.error('获取热门动态榜失败: ' + popularArticlesResponse.message)
+    }
+  } catch (error) {
+    ElMessage.error('获取排行榜数据失败')
+    console.error(error)
+  }
+}
+
+// 初始化所有数据
+const initializeData = async () => {
+  // 使用Promise.all并行初始化文章列表和排行榜数据
+  await Promise.all([
+    fetchAllArticles(),
+    fetchRankingData()
+  ])
+}
+
 onMounted(() => {
-  fetchAllArticles()
+  initializeData()
 })
 </script>
 

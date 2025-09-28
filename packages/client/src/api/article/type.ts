@@ -85,3 +85,33 @@ export interface LikeResponse extends Response {
     likes: number
   }
 }
+
+// 活跃用户榜数据
+export interface ActiveUserRanking {
+  user: Author
+  likeCount: number
+}
+
+// 热门动态榜数据
+export interface PopularArticleRanking {
+  article: {
+    id: string
+    title: string
+    content: string
+    images: string[]
+    tags: string[]
+    create_time: string
+  }
+  author: Author
+  likeCount: number
+}
+
+// 活跃用户榜响应
+export interface ActiveUsersRankingResponse extends Response {
+  data: ActiveUserRanking[]
+}
+
+// 热门动态榜响应
+export interface PopularArticlesRankingResponse extends Response {
+  data: PopularArticleRanking[]
+}

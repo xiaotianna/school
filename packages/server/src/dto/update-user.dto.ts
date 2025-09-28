@@ -4,11 +4,15 @@ import {
   IsArray,
   IsEnum,
   IsBoolean,
+  Length,
 } from 'class-validator';
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
+  @Length(1, 20, {
+    message: '用户名长度必须在1-20个字符之间',
+  })
   username?: string;
 
   @IsOptional()
