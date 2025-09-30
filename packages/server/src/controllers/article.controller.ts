@@ -25,6 +25,7 @@ import { ResponseData } from '../common/response';
 import type { Request } from 'express';
 import { GetArticlesDto } from '../dto/get-articles.dto';
 import { AddArticleCommentDto } from '../dto/add-article-comment.dto';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('article')
 @UseGuards(JwtGuard)
@@ -36,6 +37,7 @@ export class ArticleController {
    * @param keyword 搜索关键词
    */
   @Get('search')
+  @Public()
   async search(@Query('keyword') keyword: string) {
     try {
       const results = await this.articleService.search(keyword);
@@ -50,6 +52,7 @@ export class ArticleController {
    * @returns 文章列表
    */
   @Get('all')
+  @Public()
   async findAllPublished() {
     try {
       const articles = await this.articleService.findAllPublished();
@@ -281,6 +284,7 @@ export class ArticleController {
    * 活跃用户榜接口 - 获取近7天文章点赞总数最多的用户
    */
   @Get('ranking/active-users')
+  @Public()
   async getActiveUsersRanking() {
     const ranking = await this.articleService.getActiveUsersRanking();
     return ResponseData.success(ranking, '获取活跃用户榜成功');
@@ -290,6 +294,7 @@ export class ArticleController {
    * 热门动态榜接口 - 获取近3天点赞最多的文章
    */
   @Get('ranking/popular-articles')
+  @Public()
   async getPopularArticlesRanking() {
     const ranking = await this.articleService.getPopularArticlesRanking();
     return ResponseData.success(ranking, '获取热门动态榜成功');

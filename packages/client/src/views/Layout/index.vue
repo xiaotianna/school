@@ -3,7 +3,7 @@
     <el-container class="w-full h-full">
       <el-aside class="w-64 h-full border-r bg-muted/10">
         <!-- 头像 -->
-        <div class="p-4 border-b">
+        <div v-if="userStore.token" class="p-4 border-b">
           <div class="flex items-center gap-2">
             <div class="h-8 w-8 rounded-full bg-primary">
               <img :src="proxy.$baseUrl + userStore.imgUrl" alt="avatar" class="h-full w-full rounded-full"></img>
@@ -21,7 +21,7 @@
             <div class="space-y-4 p-4">
               <nav class="space-y-2">
                 <div
-                  v-for="(item, index) in menus"
+                  v-for="(item, index) in renderMenus"
                   :key="index"
                 >
                   <Button
@@ -70,7 +70,7 @@ import User from '@/components/icon/user.vue'
 import Setting from '@/components/icon/setting.vue'
 import Publish from '@/components/icon/publish.vue'
 import { Button } from '@/components/ui/button'
-import { getCurrentInstance } from 'vue'
+import { computed, getCurrentInstance } from 'vue'
 import { useUserStore } from '@/store/user'
 const { proxy } = getCurrentInstance() as any
 
@@ -82,7 +82,8 @@ const menus = [
     name: '发布',
     path: '/publish',
     icon: Publish,
-    link: true
+    link: true,
+    isLogin: true
   },
   {
     type: 'menu',
@@ -94,19 +95,22 @@ const menus = [
     type: 'menu',
     name: '消息',
     path: '/dashboard/message',
-    icon: Message
+    icon: Message,
+    isLogin: true
   },
   {
     type: 'menu',
     name: '内容管理',
     path: '/dashboard/content',
-    icon: All
+    icon: All,
+    isLogin: true
   },
   {
     type: 'menu',
     name: '我的',
     path: '/dashboard/user',
-    icon: User
+    icon: User,
+    isLogin: true
   },
   {
     type: 'line'
@@ -115,7 +119,17 @@ const menus = [
     type: 'menu',
     name: '设置',
     path: '/dashboard/setting',
-    icon: Setting
+    icon: Setting,
+    isLogin: true
   }
 ]
+
+const renderMenus = computed(() => {
+  return menus.filter((item) => {
+    if (item.isLogin && !userStore.token) {
+      return false
+    }
+    return true
+  })
+})
 </script>
