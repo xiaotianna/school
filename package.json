@@ -9,9 +9,13 @@
     "build:client": "pnpm -F client build",
     "dev:server": "pnpm -F server dev:server",
     "build:server": "pnpm -F server build",
-    "start:server": "pnpm -F server start"
+    "start:server": "pnpm -F server start",
+    "dev:all": "node start-dev.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.0.0"
+  }
 }
