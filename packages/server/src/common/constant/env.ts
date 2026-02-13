@@ -10,3 +10,9 @@ export const TYPEORM_synchronize = 'TYPEORM_synchronize';
 export const JWT_SECRET = 'JWT_SECRET';
 // jwt过期时间
 export const JWT_EXPIRES_IN = 'JWT_EXPIRES_IN';
+
+export const AI_PROVIDER = 'AI_PROVIDER';
+export const OLLAMA_BASE_URL = 'OLLAMA_BASE_URL';
+export const OLLAMA_MODEL = 'OLLAMA_MODEL';
+export const AI_TIMEOUT_MS = 'AI_TIMEOUT_MS';
+export const AI_ENABLED = 'AI_ENABLED';
