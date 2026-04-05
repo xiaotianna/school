@@ -1,0 +1,25 @@
+ARG TARGETPLATFORM
+FROM --platform=$TARGETPLATFORM node:20-alpine AS builder
+
+WORKDIR /app
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY packages/client/package.json ./packages/client/package.json
+
+RUN pnpm install --frozen-lockfile=false
+
+COPY packages/client ./packages/client
+
+ARG VITE_APP_API_BASE_URL=http://localhost:3000
+ENV VITE_APP_API_BASE_URL=$VITE_APP_API_BASE_URL
+
+RUN pnpm -F client build
+
+FROM --platform=$TARGETPLATFORM nginx:1.27-alpine
+
+COPY docker/nginx.frontend.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/packages/client/dist /usr/share/nginx/html
+
+EXPOSE 5173

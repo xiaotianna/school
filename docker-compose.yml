@@ -21,17 +21,18 @@ services:
       timeout: 5s
       retries: 10
 
-  app:
+  backend:
+    platform: ${TARGET_PLATFORM:-linux/amd64}
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: school-wall-app
+      dockerfile: Dockerfile.backend
+    container_name: school-wall-backend
     restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       DB_TYPE: mysql
       DB_HOST: mysql
       DB_PORT: 3306
@@ -40,9 +41,22 @@ services:
       DB_DATABASE: school_wall
       JWT_SECRET: school_wall-server-secret
       JWT_EXPIRES_IN: 7d
-      VITE_APP_API_BASE_URL: http://localhost:3000
     ports:
       - "3000:3000"
+
+  frontend:
+    platform: ${TARGET_PLATFORM:-linux/amd64}
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_APP_API_BASE_URL: ${VITE_APP_API_BASE_URL:-http://localhost:3000}
+    container_name: school-wall-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
       - "5173:5173"
 
 volumes:
