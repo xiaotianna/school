@@ -201,129 +201,6 @@
           </div>
         </section>
 
-        <section
-          v-if="showAiAssistant"
-          class="pt-4 border-t"
-        >
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-lg font-semibold">AI 助手</h3>
-            <button
-              class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-50"
-              @click="aiPanelOpen = !aiPanelOpen"
-            >
-              {{ aiPanelOpen ? '收起' : '展开' }}
-            </button>
-          </div>
-
-          <div
-            v-if="aiPanelOpen"
-            class="space-y-3"
-          >
-            <div class="grid grid-cols-3 gap-2">
-              <button
-                v-for="tab in aiTabs"
-                :key="tab"
-                class="w-full text-xs px-2 py-2 rounded border"
-                :class="activeAiTab === tab ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 hover:bg-gray-50'"
-                @click="activeAiTab = tab"
-              >
-                {{ aiTabLabelMap[tab] }}
-              </button>
-            </div>
-
-            <div
-              v-if="activeAiTab === 'title'"
-              class="space-y-2"
-            >
-              <button
-                class="w-full px-3 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-300"
-                :disabled="aiLoading.title"
-                @click="handleAiTitleSuggest"
-              >
-                {{ aiLoading.title ? '生成中...' : '生成3个标题' }}
-              </button>
-              <div
-                v-if="titleSuggestions.length"
-                class="space-y-2"
-              >
-                <button
-                  v-for="(item, idx) in titleSuggestions"
-                  :key="idx"
-                  class="w-full text-left px-2 py-2 text-sm border rounded hover:bg-gray-50"
-                  @click="applyTitle(item)"
-                >
-                  {{ item }}
-                </button>
-              </div>
-            </div>
-
-            <div
-              v-if="activeAiTab === 'rewrite'"
-              class="space-y-2"
-            >
-              <div class="grid grid-cols-3 gap-2">
-                <button
-                  v-for="goal in rewriteGoals"
-                  :key="goal"
-                  class="text-xs px-2 py-2 rounded border"
-                  :class="rewriteGoal === goal ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 hover:bg-gray-50'"
-                  @click="rewriteGoal = goal"
-                >
-                  {{ rewriteGoalLabelMap[goal] }}
-                </button>
-              </div>
-              <button
-                class="w-full px-3 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-300"
-                :disabled="aiLoading.rewrite"
-                @click="handleAiRewrite"
-              >
-                {{ aiLoading.rewrite ? '润色中...' : '生成润色结果' }}
-              </button>
-              <div
-                v-if="rewriteResult"
-                class="space-y-2"
-              >
-                <div class="text-xs text-gray-500">预览（节选）</div>
-                <div class="text-sm p-2 border rounded bg-gray-50 max-h-40 overflow-auto whitespace-pre-wrap">
-                  {{ rewriteResult.rewritten }}
-                </div>
-                <button
-                  class="w-full px-3 py-2 text-sm rounded border border-blue-500 text-blue-500 hover:bg-blue-50"
-                  @click="applyRewrite"
-                >
-                  应用到正文
-                </button>
-              </div>
-            </div>
-
-            <div
-              v-if="activeAiTab === 'tag'"
-              class="space-y-2"
-            >
-              <button
-                class="w-full px-3 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-300"
-                :disabled="aiLoading.tag"
-                @click="handleAiTagSuggest"
-              >
-                {{ aiLoading.tag ? '生成中...' : '生成标签建议' }}
-              </button>
-              <div
-                v-if="tagSuggestions.length"
-                class="flex flex-wrap gap-2"
-              >
-                <button
-                  v-for="(tag, idx) in tagSuggestions"
-                  :key="idx"
-                  class="text-xs px-2 py-1 rounded-full border border-gray-300 hover:bg-gray-50"
-                  @click="applyTag(tag)"
-                >
-                  #{{ tag }}
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </section>
       </div>
     </div>
   </div>
@@ -342,12 +219,6 @@ import {
   updateArticle,
   updateDraft
 } from '@/api/article'
-import {
-  suggestTitle,
-  rewriteContentStream,
-  suggestTags
-} from '@/api/ai'
-import type { RewriteResponse } from '@/api/ai/type'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
@@ -365,38 +236,7 @@ const tags = ref<string[]>([])
 
 const maxTitleLength = 20
 const isContentSaved = ref(true)
-
-type AiTab = 'title' | 'rewrite' | 'tag'
-
-type RewriteGoal = 'polish' | 'shorten' | 'expand'
-
-const aiTabs: AiTab[] = ['title', 'rewrite', 'tag']
-const aiTabLabelMap: Record<AiTab, string> = {
-  title: '标题',
-  rewrite: '润色',
-  tag: '标签'
-}
-
-const rewriteGoals: RewriteGoal[] = ['polish', 'shorten', 'expand']
-const rewriteGoalLabelMap: Record<RewriteGoal, string> = {
-  polish: '润色',
-  shorten: '精简',
-  expand: '扩写'
-}
-
-const aiPanelOpen = ref(true)
-const activeAiTab = ref<AiTab>('title')
-const rewriteGoal = ref<RewriteGoal>('polish')
-const aiLoading = ref({
-  title: false,
-  rewrite: false,
-  tag: false
-})
-const titleSuggestions = ref<string[]>([])
-const tagSuggestions = ref<string[]>([])
-const rewriteResult = ref<RewriteResponse['data'] | null>(null)
 const hasInitializedArticle = ref(false)
-const showAiAssistant = false
 
 interface UploadedImage {
   file?: File
@@ -514,22 +354,6 @@ const getEditorContent = () => {
   return editorInstance.value?.getHtml()?.trim() || ''
 }
 
-const getEditorPlainText = () => {
-  return editorInstance.value?.getText()?.trim() || ''
-}
-
-const getAiInputText = (maxLen = 1200) => {
-  const plainText = getEditorPlainText()
-  if (!plainText) return ''
-
-  if (maxLen > 0 && plainText.length > maxLen) {
-    ElMessage.warning(`AI 输入较长，已截断到前 ${maxLen} 字`)
-    return plainText.slice(0, maxLen)
-  }
-
-  return plainText
-}
-
 const handleSaveDraft = async () => {
   const content = getEditorContent()
   if (!title.value || !content) {
@@ -600,138 +424,6 @@ const handlePublish = async () => {
     console.error(`文章${id ? '更新' : '发布'}失败:`, error)
     ElMessage.error(`文章${id ? '更新' : '发布'}失败`)
   }
-}
-
-const handleAiTitleSuggest = async () => {
-  const content = getAiInputText()
-  if (!content || content.length < 10) {
-    ElMessage.warning('正文至少10个字符后再生成标题')
-    return
-  }
-
-  aiLoading.value.title = true
-  try {
-    const res = await suggestTitle({
-      draftTitle: title.value,
-      content,
-      style: 'normal'
-    })
-    titleSuggestions.value = res.data?.suggestions || []
-    if (!titleSuggestions.value.length) {
-      ElMessage.warning('暂无可用标题建议')
-    }
-  } catch (error) {
-    console.error('标题建议失败:', error)
-    ElMessage.error('标题建议失败')
-  } finally {
-    aiLoading.value.title = false
-  }
-}
-
-const applyTitle = (value: string) => {
-  title.value = value.slice(0, 20)
-  isContentSaved.value = false
-  ElMessage.success('已应用标题')
-}
-
-const handleAiRewrite = async () => {
-  const content = getAiInputText(0)
-  if (!content || content.length < 10) {
-    ElMessage.warning('正文至少10个字符后再润色')
-    return
-  }
-
-  aiLoading.value.rewrite = true
-  rewriteResult.value = {
-    rewritten: '',
-    highlights: []
-  }
-  try {
-    const finalText = await rewriteContentStream(
-      {
-      title: title.value,
-      content,
-      goal: rewriteGoal.value,
-      tone: 'normal'
-      },
-      (_chunk, fullText) => {
-        rewriteResult.value = {
-          rewritten: fullText,
-          highlights: []
-        }
-      }
-    )
-
-    rewriteResult.value = {
-      rewritten: finalText,
-      highlights: []
-    }
-    if (!rewriteResult.value?.rewritten) {
-      ElMessage.warning('未生成有效润色结果')
-    }
-  } catch (error) {
-    console.error('正文润色失败:', error)
-    ElMessage.error('正文润色失败')
-  } finally {
-    aiLoading.value.rewrite = false
-  }
-}
-
-const applyRewrite = () => {
-  if (!rewriteResult.value?.rewritten) {
-    ElMessage.warning('暂无可应用内容')
-    return
-  }
-
-  const rewritten = rewriteResult.value.rewritten
-
-  try {
-    createEditor({ type: 'markdown', value: rewritten })
-    isContentSaved.value = false
-    ElMessage.success('已应用润色结果')
-  } catch (error) {
-    console.error('应用润色结果失败:', error)
-    ElMessage.error('应用润色结果失败，请重试')
-  }
-}
-
-const handleAiTagSuggest = async () => {
-  const content = getAiInputText()
-  if (!content || content.length < 10) {
-    ElMessage.warning('正文至少10个字符后再生成标签')
-    return
-  }
-
-  aiLoading.value.tag = true
-  try {
-    const res = await suggestTags({
-      title: title.value,
-      content,
-      maxTags: 5
-    })
-    tagSuggestions.value = res.data?.tags || []
-    if (!tagSuggestions.value.length) {
-      ElMessage.warning('暂无可用标签建议')
-    }
-  } catch (error) {
-    console.error('标签建议失败:', error)
-    ElMessage.error('标签建议失败')
-  } finally {
-    aiLoading.value.tag = false
-  }
-}
-
-const applyTag = (tag: string) => {
-  const normalized = tag.trim().slice(0, 10)
-  if (!normalized) return
-  if (tags.value.includes(normalized)) return
-  if (tags.value.length >= 5) {
-    ElMessage.warning('最多添加5个标签')
-    return
-  }
-  tags.value.push(normalized)
-  isContentSaved.value = false
-  ElMessage.success('已添加标签')
 }
 
 const triggerImageUpload = () => {
