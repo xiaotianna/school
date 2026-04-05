@@ -6,7 +6,6 @@ import { AiService } from '../services/ai.service';
 import { AiTitleSuggestDto } from '../dto/ai-title-suggest.dto';
 import { AiRewriteDto } from '../dto/ai-rewrite.dto';
 import { AiTagSuggestDto } from '../dto/ai-tag-suggest.dto';
-import { AiModerateDto } from '../dto/ai-moderate.dto';
 
 @Controller('ai')
 @UseGuards(JwtGuard)
@@ -62,12 +61,5 @@ export class AiController {
     const userId = (req.user as any).userId;
     const data = await this.aiService.tagSuggest(userId, dto);
     return ResponseData.success(data, '标签建议生成成功');
-  }
-
-  @Post('moderate')
-  async moderate(@Req() req: Request, @Body() dto: AiModerateDto) {
-    const userId = (req.user as any).userId;
-    const data = await this.aiService.moderate(userId, dto);
-    return ResponseData.success(data, '审核完成');
   }
 }

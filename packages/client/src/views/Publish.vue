@@ -201,7 +201,10 @@
           </div>
         </section>
 
-        <section class="pt-4 border-t">
+        <section
+          v-if="showAiAssistant"
+          class="pt-4 border-t"
+        >
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-lg font-semibold">AI 助手</h3>
             <button
@@ -216,11 +219,11 @@
             v-if="aiPanelOpen"
             class="space-y-3"
           >
-            <div class="grid grid-cols-4 gap-2">
+            <div class="grid grid-cols-3 gap-2">
               <button
                 v-for="tab in aiTabs"
                 :key="tab"
-                class="text-xs px-2 py-2 rounded border"
+                class="w-full text-xs px-2 py-2 rounded border"
                 :class="activeAiTab === tab ? 'bg-blue-500 text-white border-blue-500' : 'border-gray-300 hover:bg-gray-50'"
                 @click="activeAiTab = tab"
               >
@@ -319,31 +322,6 @@
               </div>
             </div>
 
-            <div
-              v-if="activeAiTab === 'moderate'"
-              class="space-y-2"
-            >
-              <button
-                class="w-full px-3 py-2 text-sm rounded bg-blue-500 text-white hover:bg-blue-600 disabled:bg-blue-300"
-                :disabled="aiLoading.moderate"
-                @click="runModeration"
-              >
-                {{ aiLoading.moderate ? '审核中...' : '检测内容风险' }}
-              </button>
-              <div
-                v-if="moderateResult"
-                class="p-2 border rounded text-sm"
-                :class="moderateResult.riskLevel === 'high' ? 'border-red-300 bg-red-50' : moderateResult.riskLevel === 'medium' ? 'border-yellow-300 bg-yellow-50' : 'border-green-300 bg-green-50'"
-              >
-                <div>风险等级：{{ moderateResult.riskLevel }}</div>
-                <div
-                  v-if="moderateResult.reasons?.length"
-                  class="text-xs mt-1 text-gray-600"
-                >
-                  {{ moderateResult.reasons.join('；') }}
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </div>
@@ -367,10 +345,9 @@ import {
 import {
   suggestTitle,
   rewriteContentStream,
-  suggestTags,
-  moderateContent
+  suggestTags
 } from '@/api/ai'
-import type { ModerateResponse, RewriteResponse } from '@/api/ai/type'
+import type { RewriteResponse } from '@/api/ai/type'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
@@ -389,16 +366,15 @@ const tags = ref<string[]>([])
 const maxTitleLength = 20
 const isContentSaved = ref(true)
 
-type AiTab = 'title' | 'rewrite' | 'tag' | 'moderate'
+type AiTab = 'title' | 'rewrite' | 'tag'
 
 type RewriteGoal = 'polish' | 'shorten' | 'expand'
 
-const aiTabs: AiTab[] = ['title', 'rewrite', 'tag', 'moderate']
+const aiTabs: AiTab[] = ['title', 'rewrite', 'tag']
 const aiTabLabelMap: Record<AiTab, string> = {
   title: '标题',
   rewrite: '润色',
-  tag: '标签',
-  moderate: '审核'
+  tag: '标签'
 }
 
 const rewriteGoals: RewriteGoal[] = ['polish', 'shorten', 'expand']
@@ -414,14 +390,13 @@ const rewriteGoal = ref<RewriteGoal>('polish')
 const aiLoading = ref({
   title: false,
   rewrite: false,
-  tag: false,
-  moderate: false
+  tag: false
 })
 const titleSuggestions = ref<string[]>([])
 const tagSuggestions = ref<string[]>([])
 const rewriteResult = ref<RewriteResponse['data'] | null>(null)
-const moderateResult = ref<ModerateResponse['data'] | null>(null)
 const hasInitializedArticle = ref(false)
+const showAiAssistant = false
 
 interface UploadedImage {
   file?: File
@@ -590,53 +565,11 @@ const handleSaveDraft = async () => {
   }
 }
 
-const runModeration = async () => {
-  const content = getAiInputText()
-  if (!title.value || !content) {
-    ElMessage.warning('请先填写标题和内容')
-    return null
-  }
-
-  aiLoading.value.moderate = true
-  try {
-    const res = await moderateContent({
-      title: title.value,
-      content
-    })
-    if (res.code === 200 && res.data) {
-      moderateResult.value = res.data
-      return res.data
-    }
-    return null
-  } catch (error) {
-    console.error('内容审核失败:', error)
-    ElMessage.warning('AI 审核暂不可用，继续按普通流程发布')
-    return null
-  } finally {
-    aiLoading.value.moderate = false
-  }
-}
-
 const handlePublish = async () => {
   const content = getEditorContent()
   if (!title.value || !content) {
     ElMessage.error('请填写标题和内容')
     return
-  }
-
-  const moderation = await runModeration()
-  if (moderation?.riskLevel === 'high') {
-    ElMessage.error(moderation.reasons?.[0] || '检测到高风险内容，已阻断发布')
-    return
-  }
-
-  if (moderation?.riskLevel === 'medium') {
-    const confirmed = confirm(
-      `内容可能存在风险：${moderation.reasons?.join('；') || '请谨慎发布'}。是否继续发布？`
-    )
-    if (!confirmed) {
-      return
-    }
   }
 
   try {

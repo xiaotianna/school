@@ -18,14 +18,3 @@ export interface TagSuggestResponse extends Response {
     tags: string[]
   }
 }
-
-export type RiskLevel = 'low' | 'medium' | 'high'
-
-export interface ModerateResponse extends Response {
-  data: {
-    pass: boolean
-    riskLevel: RiskLevel
-    reasons: string[]
-    maskedText?: string
-  }
-}

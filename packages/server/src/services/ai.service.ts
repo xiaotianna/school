@@ -9,9 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { AiTitleSuggestDto } from '../dto/ai-title-suggest.dto';
 import { AiRewriteDto } from '../dto/ai-rewrite.dto';
 import { AiTagSuggestDto } from '../dto/ai-tag-suggest.dto';
-import { AiModerateDto } from '../dto/ai-moderate.dto';
-
-type RiskLevel = 'low' | 'medium' | 'high';
 
 type RateLimitRecord = {
   windowStart: number;
@@ -70,7 +67,10 @@ export class AiService {
       .slice(0, 3);
 
     if (!suggestions.length) {
-      throw new HttpException('标题建议生成失败，请重试', HttpStatus.BAD_GATEWAY);
+      throw new HttpException(
+        '标题建议生成失败，请重试',
+        HttpStatus.BAD_GATEWAY,
+      );
     }
 
     while (suggestions.length < 3) {
@@ -91,7 +91,7 @@ export class AiService {
       tone: dto.tone ?? 'normal',
     };
 
-    let raw = await this.callModel('rewrite', payload);
+    const raw = await this.callModel('rewrite', payload);
 
     const rewritten = String(raw?.rewritten ?? '').trim();
     const highlights = this.ensureStringArray(raw?.highlights)
@@ -140,7 +140,11 @@ export class AiService {
     }
 
     if (dto.goal === 'expand') {
-      rewritten = await this.ensureExpandedLengthStream(payload, rewritten, onChunk);
+      rewritten = await this.ensureExpandedLengthStream(
+        payload,
+        rewritten,
+        onChunk,
+      );
     }
   }
 
@@ -159,52 +163,14 @@ export class AiService {
       .filter((tag) => tag.length > 0)
       .map((tag) => tag.slice(0, 10));
 
-    const uniqueTags = Array.from(new Set(tags)).slice(0, Math.min(dto.maxTags ?? 5, 5));
+    const uniqueTags = Array.from(new Set(tags)).slice(
+      0,
+      Math.min(dto.maxTags ?? 5, 5),
+    );
 
     return {
       tags: uniqueTags,
     };
-  }
-
-  async moderate(userId: string, dto: AiModerateDto) {
-    this.assertEnabled();
-    this.assertRateLimit(userId);
-
-    const start = Date.now();
-    try {
-      const raw = await this.callModel('moderate', {
-        title: dto.title,
-        content: this.trimText(dto.content, 1200),
-      });
-
-      const aiLevel = this.normalizeRiskLevel(raw?.riskLevel);
-      const reasons = this.ensureStringArray(raw?.reasons)
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0)
-        .slice(0, 5);
-
-      const ruleLevel = this.ruleBasedRiskLevel(`${dto.title}\n${dto.content}`);
-      const riskLevel = this.maxRisk(aiLevel, ruleLevel);
-
-      const pass = riskLevel !== 'high';
-      const maskedText = riskLevel === 'high' ? this.maskRiskWords(dto.content) : undefined;
-
-      this.logger.log(
-        `moderate userId=${userId} risk=${riskLevel} costMs=${Date.now() - start}`,
-      );
-
-      return {
-        pass,
-        riskLevel,
-        reasons: reasons.length ? reasons : this.defaultReasons(riskLevel),
-        maskedText,
-      };
-    } catch (error) {
-      this.logger.warn(
-        `moderate failed userId=${userId} costMs=${Date.now() - start} error=${error?.message ?? 'unknown'}`,
-      );
-      throw error;
-    }
   }
 
   private async callModel(task: string, payload: Record<string, any>) {
@@ -236,8 +202,7 @@ export class AiService {
   private async callOllama(task: string, prompt: string): Promise<string> {
     const requestTimeoutMs =
       task === 'rewrite' ? 0 : Math.max(this.timeoutMs, 12000);
-    const numPredict =
-      task === 'rewrite' ? -1 : task === 'moderate' ? 128 : 160;
+    const numPredict = task === 'rewrite' ? -1 : 160;
 
     const controller = new AbortController();
     const timer = requestTimeoutMs
@@ -412,14 +377,6 @@ export class AiService {
         return { tags };
       }
 
-      if (task === 'moderate') {
-        const riskLevel = this.inferRiskLevel(cleaned);
-        return {
-          riskLevel,
-          reasons: [cleaned.slice(0, 100)],
-        };
-      }
-
       throw new SyntaxError('模型未返回 JSON');
     }
   }
@@ -451,10 +408,6 @@ export class AiService {
       return `你是校园墙标签助手。基于输入推荐8个中文标签。\n要求：标签短且具体，不带#，每个<=10字。\n仅返回JSON：{"tags":["...","..."]}\n输入：${jsonPayload}`;
     }
 
-    if (task === 'moderate') {
-      return `你是内容审核助手。请判断风险等级：low/medium/high。\n只从违法违规、仇恨辱骂、暴力威胁、隐私泄露、引战骚扰等维度判断。\n仅返回JSON：{"riskLevel":"low|medium|high","reasons":["..."]}\n输入：${jsonPayload}`;
-    }
-
     return `仅返回JSON。输入：${jsonPayload}`;
   }
 
@@ -463,65 +416,14 @@ export class AiService {
     return data.filter((item) => typeof item === 'string') as string[];
   }
 
-  private normalizeRiskLevel(input: unknown): RiskLevel {
-    const value = String(input ?? 'low').toLowerCase();
-    if (value === 'high' || value === 'medium' || value === 'low') {
-      return value;
-    }
-    return 'low';
-  }
-
-  private ruleBasedRiskLevel(text: string): RiskLevel {
-    const highRiskKeywords = ['炸弹', '杀人', '约架', '恐袭', '爆炸物', '自杀教学'];
-    const mediumRiskKeywords = ['辱骂', '人肉', '隐私', '联系方式曝光', '威胁'];
-
-    if (highRiskKeywords.some((word) => text.includes(word))) {
-      return 'high';
-    }
-
-    if (mediumRiskKeywords.some((word) => text.includes(word))) {
-      return 'medium';
-    }
-
-    return 'low';
-  }
-
-  private maskRiskWords(text: string) {
-    const sensitiveWords = ['炸弹', '杀人', '约架', '恐袭', '爆炸物', '自杀教学'];
-    let masked = text;
-    sensitiveWords.forEach((word) => {
-      const replacement = '*'.repeat(word.length);
-      masked = masked.split(word).join(replacement);
-    });
-    return masked;
-  }
-
-  private defaultReasons(riskLevel: RiskLevel) {
-    if (riskLevel === 'high') {
-      return ['检测到高风险内容，请修改后重试'];
-    }
-
-    if (riskLevel === 'medium') {
-      return ['内容可能存在争议，请确认后发布'];
-    }
-
-    return ['内容风险较低'];
-  }
-
-  private maxRisk(left: RiskLevel, right: RiskLevel): RiskLevel {
-    const score = {
-      low: 1,
-      medium: 2,
-      high: 3,
-    };
-
-    return score[left] >= score[right] ? left : right;
-  }
-
   private trimText(text: string, maxLen: number): string {
-    const normalized = String(text ?? '').replace(/\s+/g, ' ').trim();
+    const normalized = String(text ?? '')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (!normalized) return normalized;
-    return normalized.length > maxLen ? normalized.slice(0, maxLen) : normalized;
+    return normalized.length > maxLen
+      ? normalized.slice(0, maxLen)
+      : normalized;
   }
 
   private async ensureExpandedLength(
@@ -596,18 +498,13 @@ export class AiService {
   }
 
   private extractTags(text: string): string[] {
-    const fromHash = Array.from(text.matchAll(/#?([\u4e00-\u9fa5A-Za-z0-9_]{1,10})/g))
+    const fromHash = Array.from(
+      text.matchAll(/#?([\u4e00-\u9fa5A-Za-z0-9_]{1,10})/g),
+    )
       .map((item) => item[1]?.trim())
       .filter((item): item is string => Boolean(item));
 
     return Array.from(new Set(fromHash));
-  }
-
-  private inferRiskLevel(text: string): RiskLevel {
-    const lower = text.toLowerCase();
-    if (lower.includes('high') || lower.includes('高')) return 'high';
-    if (lower.includes('medium') || lower.includes('中')) return 'medium';
-    return 'low';
   }
 
   private assertEnabled() {
@@ -631,7 +528,10 @@ export class AiService {
     }
 
     if (current.count >= limit) {
-      throw new HttpException('AI 请求过于频繁，请稍后再试', HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException(
+        'AI 请求过于频繁，请稍后再试',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     current.count += 1;

@@ -24,12 +24,12 @@ function detectPackageManager() {
 function getClientCommand(packageManager) {
   switch (packageManager) {
     case 'pnpm':
-      return 'pnpm -F client dev';
+      return 'pnpm -F client dev -- --host 0.0.0.0 --port 5173';
     case 'yarn':
-      return 'yarn workspace client dev';
+      return 'yarn workspace client dev --host 0.0.0.0 --port 5173';
     case 'npm':
     default:
-      return 'npm run dev --workspace=client';
+      return 'npm run dev --workspace=client -- --host 0.0.0.0 --port 5173';
   }
 }
 

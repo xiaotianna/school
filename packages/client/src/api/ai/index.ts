@@ -2,7 +2,6 @@ import request from '@/api/request'
 import { baseUrl } from '@/common'
 import { useUserStore } from '@/store/user'
 import type {
-  ModerateResponse,
   RewriteResponse,
   TagSuggestResponse,
   TitleSuggestResponse
@@ -12,8 +11,7 @@ enum API {
   TITLE_SUGGEST = '/ai/title-suggest',
   REWRITE = '/ai/rewrite',
   REWRITE_STREAM = '/ai/rewrite-stream',
-  TAG_SUGGEST = '/ai/tag-suggest',
-  MODERATE = '/ai/moderate'
+  TAG_SUGGEST = '/ai/tag-suggest'
 }
 
 export const suggestTitle = (data: {
@@ -94,14 +92,6 @@ export const suggestTags = (data: {
 }) => {
   return request<any, TagSuggestResponse>({
     url: API.TAG_SUGGEST,
-    method: 'post',
-    data
-  })
-}
-
-export const moderateContent = (data: { title: string; content: string }) => {
-  return request<any, ModerateResponse>({
-    url: API.MODERATE,
     method: 'post',
     data
   })

@@ -48,3 +48,29 @@ pnpm dev:server
 ## 项目部署
 
 前端采用 `Github Actions`，后端采用 `Vercel`
+
+## Docker 一键启动（前端 + 后端 + MySQL）
+
+在项目根目录执行：
+
+```bash
+docker compose up -d --build
+```
+
+启动完成后：
+
+- 前端：`http://localhost:5173`
+- 后端：`http://localhost:3000`
+- MySQL：`localhost:3306`
+
+停止并移除容器：
+
+```bash
+docker compose down
+```
+
+如果希望同时删除 MySQL 数据卷：
+
+```bash
+docker compose down -v
+```
